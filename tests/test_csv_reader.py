@@ -6,6 +6,7 @@ from pandas_toolkit.io.csv_reader import CSVReader
 import pandas as pd
 import tempfile
 import os
+import pytest
 
 
 def test_csv_reader_reads_valid_file():
@@ -27,4 +28,43 @@ def test_csv_reader_reads_valid_file():
     assert list(df.columns) == ["col1", "col2"] 
     
     os.remove(tmp_path) 
+
+
+def test_csv_reader_especific_delimiter():
+    """
+    Test with especific delimiter.
+    """    
+        
+    reader = CSVReader()
+    content = "col1,col2\n1,2\n3,4"
+
+    with tempfile.NamedTemporaryFile(mode='w+', suffix=".csv", delete=False) as tmp:
+        tmp.write(content)
+        tmp_path = tmp.name
     
+    df = reader.read(tmp_path,delimiter = ",") ## Explicit delimiter
+    
+    assert isinstance(df, pd.DataFrame)       
+    assert df.shape == (2, 2)                 
+    assert list(df.columns) == ["col1", "col2"] 
+    
+    os.remove(tmp_path) 
+    
+# def test_csv_reader_fails_with_bad_encoding():
+#     """
+#     CSV with bad encoding.
+#     """
+#     reader = CSVReader()
+#     content = "col1,col2\n1,á\n2,ó" # content with especial characters
+
+#     with tempfile.NamedTemporaryFile(mode='w+', suffix=".csv", delete=False, encoding="utf-8") as tmp:
+#         tmp.write(content)
+#         tmp_path = tmp.name
+
+   
+#     with pytest.raises(UnicodeDecodeError):
+#         # Try with ascii encoding
+#         reader.encodings = ['ascii']
+#         df = reader.read(tmp_path)
+
+#     os.remove(tmp_path)

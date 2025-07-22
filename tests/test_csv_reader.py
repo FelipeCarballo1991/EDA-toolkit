@@ -3,6 +3,7 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from pandas_toolkit.io.csv_reader import CSVReader
+from pandas_toolkit.io.errors import FileEncodingError
 import pandas as pd
 import tempfile
 import os
@@ -50,21 +51,21 @@ def test_csv_reader_especific_delimiter():
     
     os.remove(tmp_path) 
     
-# def test_csv_reader_fails_with_bad_encoding():
-#     """
-#     CSV with bad encoding.
-#     """
-#     reader = CSVReader()
-#     content = "col1,col2\n1,á\n2,ó" # content with especial characters
+def test_csv_reader_fails_with_bad_encoding():
+    """
+    CSV with bad encoding.
+    """
+    reader = CSVReader()
+    content = "col1,col2\n1,á\n2,ó" # content with especial characters
 
-#     with tempfile.NamedTemporaryFile(mode='w+', suffix=".csv", delete=False, encoding="utf-8") as tmp:
-#         tmp.write(content)
-#         tmp_path = tmp.name
+    with tempfile.NamedTemporaryFile(mode='w+', suffix=".csv", delete=False, encoding="utf-8") as tmp:
+        tmp.write(content)
+        tmp_path = tmp.name
 
    
-#     with pytest.raises(UnicodeDecodeError):
-#         # Try with ascii encoding
-#         reader.encodings = ['ascii']
-#         df = reader.read(tmp_path)
+    with pytest.raises(FileEncodingError):
+        # Try with ascii encoding
+        reader.encodings = ['ascii']
+        df = reader.read(tmp_path)
 
-#     os.remove(tmp_path)
+    os.remove(tmp_path)

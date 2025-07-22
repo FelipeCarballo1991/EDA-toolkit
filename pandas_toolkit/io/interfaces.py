@@ -1,6 +1,7 @@
 # pandas_toolkit/io/interfaces.py
 from abc import ABC, abstractmethod
 import pandas as pd
+from pandas_toolkit.io.errors import FileEncodingError
 
 COMMON_ENCODINGS = [
     "utf-8",
@@ -15,6 +16,8 @@ class FileReader(ABC):
     @abstractmethod
     def read(self, filepath: str, **kwargs) -> pd.DataFrame:
         pass
+
+
 
 
 class FileReaderEncoding(FileReader):   
@@ -33,4 +36,4 @@ class FileReaderEncoding(FileReader):
                 return self._read_with_encoding(filepath, enc, **kwargs) # for example read_csv  == _read_with_encoding (from csv_reader) 
             except UnicodeDecodeError:
                 continue
-        raise UnicodeDecodeError(f"We can't encode {filepath} with encodings {self.encodings}")
+        raise FileEncodingError(f"We can't encode {filepath} with encodings {self.encodings}")

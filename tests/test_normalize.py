@@ -4,7 +4,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 from pandas_toolkit.io.interfaces import NormalizeMixin
 import pandas as pd
-
+import numpy as np
 
 def test_normalize_df():
     """
@@ -12,10 +12,10 @@ def test_normalize_df():
     """    
 
     df = pd.DataFrame({
-    "nombre": [" Felipe ", "MARÍA", None],
-    "edad": [30, 25, 40],
-    "ciudad": [" caba ", "rosario", ""],
-    "vacía": [None, None, None]
+    "nombre": [" Felipe ", "MARÍA", None,None],
+    "edad": [30, 25, 40, np.nan],
+    "ciudad": [" caba ", "rosario", "",None],
+    "vacía": [None, None, None, None]
     })
 
     normalizador = NormalizeMixin()

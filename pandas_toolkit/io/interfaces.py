@@ -18,23 +18,27 @@ class NormalizeMixin:
         df: pd.DataFrame,
         *, # all arguments be named
         drop_empty_cols: bool = True,
+        drop_empty_rows: bool = True,
         trim_strings: bool = True,
         convert_case: str = "lower",  # 'lower', 'upper', o None
     ) -> pd.DataFrame:
 
-      """
+        """
         Normalize a DataFrame:
-        - Drop columns that are completely empty (if drop_empty_cols).
+        - Drop columns and rows that are completely empty (if drop_empty_cols).
         - Trim whitespace from string values (if trim_strings).
         - Transform "" (empty strings) to None.
         - Convert string values to lowercase or uppercase (according to convert_case).
 
         :return: Normalized DataFrame.
-      """
+        """
         df = df.copy()
 
         if drop_empty_cols:
             df = df.dropna(axis=1, how="all")
+
+        if drop_empty_rows:
+            df = df.dropna(axis=0, how="all")
         
         def normalize_str(val: str):
             if not isinstance(val, str):

@@ -80,3 +80,22 @@ class FileReaderEncoding(FileReader):
             except UnicodeDecodeError:
                 continue
         raise FileEncodingError(f"We can't encode {filepath} with encodings {self.encodings}")
+
+
+
+class DelimitedTextReader(FileReaderEncoding):
+    def __init__(self, encodings=None, delimiters=None):
+        super().__init__(encodings)
+        self.delimiters = delimiters or COMMON_DELIMITERS
+
+    def _read_with_encoding(self, filepath: str, encoding: str, **kwargs) -> pd.DataFrame:
+        for delim in self.delimiters:
+            try:
+                df = pd.read_csv(filepath, encoding=encoding, delimiter=delim, **kwargs)
+                if df.shape[1] > 1:
+                    return df
+            except Exception:
+                continue
+        raise FileEncodingError(
+            f"No se pudo leer {filepath} con encoding {encoding} y delimitadores {self.delimiters}"
+        )

@@ -42,7 +42,7 @@ def test_csv_reader_especific_delimiter():
         tmp.write(content)
         tmp_path = tmp.name
     
-    df = reader.read(tmp_path,delimiter = ",") ## Explicit delimiter
+    df = reader.read(tmp_path)
     
     assert isinstance(df, pd.DataFrame)       
     assert df.shape == (2, 2)                 

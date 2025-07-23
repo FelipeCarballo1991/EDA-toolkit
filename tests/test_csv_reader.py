@@ -6,7 +6,6 @@ from pandas_toolkit.io.csv_reader import CSVReader
 from pandas_toolkit.io.errors import FileEncodingError
 import pandas as pd
 import tempfile
-import os
 import pytest
 
 

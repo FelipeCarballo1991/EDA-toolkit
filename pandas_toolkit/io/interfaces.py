@@ -12,16 +12,55 @@ COMMON_ENCODINGS = [
     "utf-16"
 ]
 
-class FileReader(ABC):
+class NormalizeMixin:
+    def normalize(
+        self,
+        df: pd.DataFrame,
+        *, # all arguments be named
+        drop_empty_cols: bool = True,
+        trim_strings: bool = True,
+        convert_case: str = "lower",  # 'lower', 'upper', o None
+    ) -> pd.DataFrame:
+
+      """
+        Normalize a DataFrame:
+        - Drop columns that are completely empty (if drop_empty_cols).
+        - Trim whitespace from string values (if trim_strings).
+        - Transform "" (empty strings) to None.
+        - Convert string values to lowercase or uppercase (according to convert_case).
+
+        :return: Normalized DataFrame.
+      """
+        df = df.copy()
+
+        if drop_empty_cols:
+            df = df.dropna(axis=1, how="all")
+        
+        def normalize_str(val: str):
+            if not isinstance(val, str):
+                return val
+            val = val.strip() if trim_strings else val
+            if val == "":
+                return None 
+            if convert_case == "lower":
+                val = val.lower()
+            elif convert_case == "upper":
+                val = val.upper()
+            return val
+
+        str_cols = df.select_dtypes(include=["object", "string"]).columns
+
+        for col in str_cols:
+            df[col] = df[col].apply(normalize_str)
+
+        return df
+
+class FileReader(ABC,NormalizeMixin):
     @abstractmethod
     def read(self, filepath: str, **kwargs) -> pd.DataFrame:
         pass
 
-
-
-
-class FileReaderEncoding(FileReader):   
-
+class FileReaderEncoding(FileReader):
     def __init__(self, encodings=None):
         self.encodings = encodings or COMMON_ENCODINGS
 

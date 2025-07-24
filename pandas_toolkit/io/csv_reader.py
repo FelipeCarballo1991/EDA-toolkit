@@ -8,4 +8,4 @@ import pandas as pd
 
 class CSVReader(DelimitedTextReader):
     def __init__(self, encodings=None):
-        super().__init__(encodings=encodings, delimiters=[",",";","|"])
+        super().__init__(encodings=encodings, delimiters=[",",";","|","\t"])

@@ -87,15 +87,15 @@ class FileReaderEncoding(FileReader):
 class DelimitedTextReader(FileReaderEncoding):
     def __init__(self, encodings=None, delimiters=None):
         super().__init__(encodings)
-        self.delimiters = delimiters or COMMON_DELIMITERS
+        self.delimiters = delimiters #or COMMON_DELIMITERS
 
     def _read_with_encoding(self, filepath: str, encoding: str, **kwargs) -> pd.DataFrame:
 
-        def capturar_linea(bad_line):  
-            # errores = []          
-            errores.append(bad_line)
-            print(f"[WARN] Línea defectuosa: {bad_line}")
-            raise ValueError("Línea defectuosa descartada")
+        # def capturar_linea(bad_line):  
+        #     # errores = []          
+        #     errores.append(bad_line)
+        #     print(f"[WARN] Línea defectuosa: {bad_line}")
+        #     raise ValueError("Línea defectuosa descartada")
 
         for delim in self.delimiters:
             try:

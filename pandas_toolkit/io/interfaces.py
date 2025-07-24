@@ -34,6 +34,7 @@ class NormalizeMixin:
         """
         df = df.copy()
 
+        
         if drop_empty_cols:
             df = df.dropna(axis=1, how="all")
 
@@ -89,9 +90,20 @@ class DelimitedTextReader(FileReaderEncoding):
         self.delimiters = delimiters or COMMON_DELIMITERS
 
     def _read_with_encoding(self, filepath: str, encoding: str, **kwargs) -> pd.DataFrame:
+
+        def capturar_linea(bad_line):  
+            # errores = []          
+            errores.append(bad_line)
+            print(f"[WARN] Línea defectuosa: {bad_line}")
+            raise ValueError("Línea defectuosa descartada")
+
         for delim in self.delimiters:
             try:
-                df = pd.read_csv(filepath, encoding=encoding, delimiter=delim, **kwargs)
+                df = pd.read_csv(filepath, 
+                                 encoding=encoding, 
+                                 delimiter=delim, 
+                                #  on_bad_lines=capturar_linea,
+                                 **kwargs)
                 if df.shape[1] > 1:
                     return df
             except Exception:

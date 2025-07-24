@@ -68,3 +68,36 @@ def test_csv_reader_fails_with_bad_encoding():
         df = reader.read(tmp_path)
 
     os.remove(tmp_path)
+
+
+# def test_bad_lines_capture_and_print(capsys):
+
+#     reader = CSVReader()
+#     content = (
+#                 "col1,col2\n"
+#                 "1,2\n"
+#                 "3,4,5\n"      # Bad Line
+#                 "6,7\n"
+#             )
+
+
+#     with tempfile.NamedTemporaryFile(mode='w+', suffix=".csv", delete=False) as tmp:
+#         tmp.write(content)
+#         tmp_path = tmp.name
+    
+#     df = reader.read(tmp_path)
+
+#     captured = capsys.readouterr()
+
+#     # Verificamos que el DataFrame cargue solo las filas válidas
+#     assert df.shape[0] == 3  # Debe cargar 3 filas (incluye header)
+#     assert df.shape[1] == 2
+#     assert df.iloc[0]["col1"] == 1
+#     assert df.iloc[1]["col1"] == 3  # fila "3,4,5" debería descartarse, pero cuidado con pandas
+#     assert df.iloc[2]["col1"] == 6
+
+#     # Verificamos que la línea defectuosa se haya registrado en la salida de consola
+#     assert "[WARN] Línea defectuosa" in captured.out
+#     assert "3,4,5" in captured.out
+
+#     os.remove(tmp_path)

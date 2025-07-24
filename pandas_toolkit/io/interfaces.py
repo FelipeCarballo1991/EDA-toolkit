@@ -94,9 +94,12 @@ class FileReaderEncoding(FileReader):
 
 
 class DelimitedTextReader(FileReaderEncoding):
-    def __init__(self, encodings=None, delimiters=None):
+    def __init__(self, encodings=None, delimiters=None, verbose = False):
         super().__init__(encodings)
         self.delimiters = delimiters  or COMMON_DELIMITERS
+        self.success_encoding = None
+        self.success_delimiter = None
+        self.verbose = verbose 
 
     def _read_with_encoding(self, filepath: str, encoding: str, **kwargs) -> pd.DataFrame:
 
@@ -108,18 +111,26 @@ class DelimitedTextReader(FileReaderEncoding):
 
         for delim in self.delimiters:
             try:
-                # print(f"[INFO] Probando encoding={encoding}, delimiter='{delim}'")
+                if self.verbose:
+                    print(f"[🔍] Intentando: encoding='{encoding}', delimiter='{delim}'")
+                
                 df = pd.read_csv(filepath, 
                                  encoding=encoding, 
                                  delimiter=delim, 
                                 #  on_bad_lines=capturar_linea,
                                  **kwargs)
                 if df.shape[1] > 1:
+                    self.success_encoding = encoding
+                    self.success_delimiter = delim
+                    if self.verbose:
+                        print(f"[✅] Lectura exitosa con encoding='{encoding}', delimiter='{delim}'")
                     return df
             except Exception as e:
                 if isinstance(e, UnicodeDecodeError):
                     raise
                 elif isinstance(e, (ParserError, ValueError)):
+                    if self.verbose:
+                        print(f"[⚠️] Falló con encoding='{encoding}', delimiter='{delim}'")
                     continue
                 # try:
         raise FileEncodingError(

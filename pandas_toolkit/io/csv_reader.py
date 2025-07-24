@@ -7,5 +7,6 @@ import pandas as pd
 #         return pd.read_csv(filepath, encoding=encoding, **kwargs)
 
 class CSVReader(DelimitedTextReader):
-    def __init__(self, encodings=None):
-        super().__init__(encodings=encodings, delimiters=[",",";","|","\t"])
+    def __init__(self, encodings=None, delimiters = None):
+        super().__init__(encodings=encodings, 
+                         delimiters= delimiters)

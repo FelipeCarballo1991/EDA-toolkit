@@ -2,15 +2,23 @@
 from abc import ABC, abstractmethod
 import pandas as pd
 from pandas_toolkit.io.errors import FileEncodingError
+from pandas.errors import ParserError
 
-COMMON_ENCODINGS = [
+
+
+COMMON_ENCODINGS = [    
     "utf-8",
-    "utf-8-sig",
-    "latin1",
+    "utf-8-sig",    
     "cp1252",
+    "latin1",
     "iso-8859-1",
     "utf-16"
 ]
+
+COMMON_DELIMITERS =[",",
+                    ";",
+                    "|",
+                    "\t"]
 
 class NormalizeMixin:
     def normalize(
@@ -77,8 +85,9 @@ class FileReaderEncoding(FileReader):
     def read(self, filepath: str, **kwargs) -> pd.DataFrame:
         for enc in self.encodings:
             try:
+                
                 return self._read_with_encoding(filepath, enc, **kwargs) # for example read_csv  == _read_with_encoding (from csv_reader) 
-            except UnicodeDecodeError:
+            except UnicodeDecodeError:                
                 continue
         raise FileEncodingError(f"We can't encode {filepath} with encodings {self.encodings}")
 
@@ -87,7 +96,7 @@ class FileReaderEncoding(FileReader):
 class DelimitedTextReader(FileReaderEncoding):
     def __init__(self, encodings=None, delimiters=None):
         super().__init__(encodings)
-        self.delimiters = delimiters #or COMMON_DELIMITERS
+        self.delimiters = delimiters  or COMMON_DELIMITERS
 
     def _read_with_encoding(self, filepath: str, encoding: str, **kwargs) -> pd.DataFrame:
 
@@ -99,6 +108,7 @@ class DelimitedTextReader(FileReaderEncoding):
 
         for delim in self.delimiters:
             try:
+                # print(f"[INFO] Probando encoding={encoding}, delimiter='{delim}'")
                 df = pd.read_csv(filepath, 
                                  encoding=encoding, 
                                  delimiter=delim, 
@@ -106,8 +116,14 @@ class DelimitedTextReader(FileReaderEncoding):
                                  **kwargs)
                 if df.shape[1] > 1:
                     return df
-            except Exception:
-                continue
+            except Exception as e:
+                if isinstance(e, UnicodeDecodeError):
+                    raise
+                elif isinstance(e, (ParserError, ValueError)):
+                    continue
+                # try:
         raise FileEncodingError(
-            f"No se pudo leer {filepath} con encoding {encoding} y delimitadores {self.delimiters}"
+            f"We can't encode {filepath} with encodings {self.encodings} in _read_with_encoding"
         )
+        # except FileEncodingError as e:
+        #     print("Capturado error:", e)

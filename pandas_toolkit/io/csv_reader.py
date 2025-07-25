@@ -13,3 +13,7 @@ class CSVReader(DelimitedTextReader):
             delimiters=delimiters,
             verbose=verbose
         )
+
+    def read_and_normalize(self, filepath, **kwargs):
+        df = self.read(filepath, **kwargs)
+        return self.normalize(df)

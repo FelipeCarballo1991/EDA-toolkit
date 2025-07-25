@@ -120,8 +120,7 @@ class DelimitedTextReader(FileReaderEncoding):
                 if self.verbose:
                     print(f"[🔍] Intentando: encoding='{encoding}', delimiter='{delim}'")
                 
-                if self.capture_bad_lines:
-                    print("INFO----- ENTRA EN ENGINE PYTHON")
+                if self.capture_bad_lines:                   
                     df = pd.read_csv(filepath, 
                                     encoding=encoding, 
                                     delimiter=delim,

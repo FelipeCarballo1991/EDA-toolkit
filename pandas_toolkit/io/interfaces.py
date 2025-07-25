@@ -99,31 +99,43 @@ class FileReaderEncoding(FileReader):
 
 
 class DelimitedTextReader(FileReaderEncoding):
-    def __init__(self, encodings=None, delimiters=None, verbose = False):
+    def __init__(self, encodings=None, delimiters=None, verbose = False, capture_bad_lines = False):
         super().__init__(encodings)
         self.delimiters = delimiters  or COMMON_DELIMITERS
         self.success_encoding = None
         self.success_delimiter = None
-        self.verbose = verbose 
+        self.verbose = verbose
+        self.capture_bad_lines = capture_bad_lines
+        self.bad_lines = [] 
 
     def _read_with_encoding(self, filepath: str, encoding: str, **kwargs) -> pd.DataFrame:
 
-        # def capturar_linea(bad_line):  
-        #     # errores = []          
-        #     errores.append(bad_line)
-        #     print(f"[WARN] Línea defectuosa: {bad_line}")
-        #     raise ValueError("Línea defectuosa descartada")
+        def capturar_linea(bad_line):
+            self.bad_lines.append(bad_line)
+            if self.verbose:
+                print(f"[WARNING] Bad line: {bad_line}")
 
         for delim in self.delimiters:
             try:
                 if self.verbose:
                     print(f"[🔍] Intentando: encoding='{encoding}', delimiter='{delim}'")
                 
-                df = pd.read_csv(filepath, 
-                                 encoding=encoding, 
-                                 delimiter=delim, 
-                                #  on_bad_lines=capturar_linea,
-                                 **kwargs)
+                if self.capture_bad_lines:
+                    print("INFO----- ENTRA EN ENGINE PYTHON")
+                    df = pd.read_csv(filepath, 
+                                    encoding=encoding, 
+                                    delimiter=delim,
+                                     engine = "python", 
+                                    on_bad_lines=capturar_linea,
+                                    **kwargs)
+                else:
+                    df = pd.read_csv(filepath, 
+                                    encoding=encoding, 
+                                    delimiter=delim,
+                                    # engine = "python", 
+                                    on_bad_lines="warn",
+                                    **kwargs)
+                    
                 if df.shape[1] > 1:
                     self.success_encoding = encoding
                     self.success_delimiter = delim
@@ -131,6 +143,7 @@ class DelimitedTextReader(FileReaderEncoding):
                         print(f"[✅] Lectura exitosa con encoding='{encoding}', delimiter='{delim}'")
                     return df
             except Exception as e:
+                error_original = e
                 if isinstance(e, UnicodeDecodeError):
                     raise
                 elif isinstance(e, (ParserError, ValueError)):
@@ -138,8 +151,8 @@ class DelimitedTextReader(FileReaderEncoding):
                         print(f"[⚠️] Falló con encoding='{encoding}', delimiter='{delim}'")
                     continue
                 # try:
-        raise FileEncodingError(
-            f"We can't encode {filepath} with encodings {self.encodings} in _read_with_encoding"
+        raise FileEncodingError(            
+            f"Detalle Error: {error_original}"
         )
         # except FileEncodingError as e:
         #     print("Capturado error:", e)

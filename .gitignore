@@ -209,3 +209,5 @@ __marimo__/
 #Tests
 Tests.ipynb
 test.py
+personas_bad.csv
+personas_ok.csv

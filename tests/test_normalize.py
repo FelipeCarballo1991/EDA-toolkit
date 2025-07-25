@@ -22,15 +22,16 @@ def test_normalize_df():
     df_norm = normalizador.normalize(df, convert_case="lower")
 
     assert isinstance(df_norm, pd.DataFrame)       
-    assert df_norm.shape == (3,3)                 
-    assert list(df_norm.columns) == ["nombre", "edad","ciudad"] 
+    assert df_norm.shape == (3,5)        
+
+    assert list(df_norm.columns) == ["nombre", "edad","ciudad","nombre_norm","ciudad_norm"] 
 
     
-    assert df_norm.loc[0, "nombre"] == "felipe"     # String Capitalize with spaces
-    assert df_norm.loc[1, "nombre"] == "maría"      # Upper String
+    assert df_norm.loc[0, "nombre_norm"] == "felipe"     # String Capitalize with spaces
+    assert df_norm.loc[1, "nombre_norm"] == "maría"      # Upper String
     assert pd.isna(df_norm.loc[2, "nombre"])        # None value
 
-    assert df_norm.loc[0, "ciudad"] == "caba"       # Lower string with spaces
-    assert df_norm.loc[2, "ciudad"] == None           # Empty string = None value
+    assert df_norm.loc[0, "ciudad_norm"] == "caba"       # Lower string with spaces
+    assert df_norm.loc[2, "ciudad_norm"] == None           # Empty string = None value
 
     assert df_norm["edad"].tolist() == [30, 25, 40]

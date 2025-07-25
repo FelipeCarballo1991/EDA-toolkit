@@ -22,51 +22,56 @@ COMMON_DELIMITERS =[",",
 
 class NormalizeMixin:
     def normalize(
-        self,
-        df: pd.DataFrame,
-        *, # all arguments be named
-        drop_empty_cols: bool = True,
-        drop_empty_rows: bool = True,
-        trim_strings: bool = True,
-        convert_case: str = "lower",  # 'lower', 'upper', o None
-    ) -> pd.DataFrame:
+            self,
+            df: pd.DataFrame,
+            *,
+            drop_empty_cols: bool = True,
+            drop_empty_rows: bool = True,
+            trim_strings: bool = True,
+            convert_case: str = "lower",  # 'lower', 'upper', o None
+            # keep_original: bool = False,  # <--- NUEVO
+        ) -> pd.DataFrame:
+            """
+            Normalize a DataFrame:
+            - Drop columns and rows that are completely empty (if drop_empty_*).
+            - Trim whitespace from string values (if trim_strings).
+            - Transform "" (empty strings) to None.
+            - Convert string values to lowercase or uppercase (according to convert_case).
+            - If keep_original is True, creates new columns with '_norm' suffix instead of overwriting.
 
-        """
-        Normalize a DataFrame:
-        - Drop columns and rows that are completely empty (if drop_empty_cols).
-        - Trim whitespace from string values (if trim_strings).
-        - Transform "" (empty strings) to None.
-        - Convert string values to lowercase or uppercase (according to convert_case).
+            :return: Normalized DataFrame.
+            """
+            df = df.copy()
 
-        :return: Normalized DataFrame.
-        """
-        df = df.copy()
+            if drop_empty_cols:
+                df = df.dropna(axis=1, how="all")
 
-        
-        if drop_empty_cols:
-            df = df.dropna(axis=1, how="all")
+            if drop_empty_rows:
+                df = df.dropna(axis=0, how="all")
 
-        if drop_empty_rows:
-            df = df.dropna(axis=0, how="all")
-        
-        def normalize_str(val: str):
-            if not isinstance(val, str):
+            def normalize_str(val: str):
+                if not isinstance(val, str):
+                    return val
+                val = val.strip() if trim_strings else val
+                if val == "":
+                    return None
+                if convert_case == "lower":
+                    val = val.lower()
+                elif convert_case == "upper":
+                    val = val.upper()
                 return val
-            val = val.strip() if trim_strings else val
-            if val == "":
-                return None 
-            if convert_case == "lower":
-                val = val.lower()
-            elif convert_case == "upper":
-                val = val.upper()
-            return val
 
-        str_cols = df.select_dtypes(include=["object", "string"]).columns
+            str_cols = df.select_dtypes(include=["object", "string"]).columns
 
-        for col in str_cols:
-            df[col] = df[col].apply(normalize_str)
+            for col in str_cols:
+                normalized = df[col].apply(normalize_str)
+                if f"{col}_norm" not in df.columns:
+                    df[f"{col}_norm"] = normalized
+                else:
+                    continue
+            
 
-        return df
+            return df
 
 class FileReader(ABC,NormalizeMixin):
     @abstractmethod

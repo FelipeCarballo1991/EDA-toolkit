@@ -2,10 +2,6 @@
 from pandas_toolkit.io.interfaces import DelimitedTextReader
 import pandas as pd
 
-# class CSVReader(FileReaderEncoding):
-#     def _read_with_encoding(self, filepath: str, encoding: str, **kwargs):
-#         return pd.read_csv(filepath, encoding=encoding, **kwargs)
-
 class CSVReader(DelimitedTextReader):
     def __init__(self, encodings=None, delimiters=None, verbose=False):
         super().__init__(

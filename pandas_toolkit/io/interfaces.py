@@ -128,6 +128,8 @@ class DelimitedTextReader(FileReaderEncoding):
                                     on_bad_lines=capturar_linea,
                                     **kwargs)
                 else:
+                    if self.verbose:
+                        print(f"[🔍] Detectando lineas erroneas (La ejecución puede durar más tiempo).")
                     df = pd.read_csv(filepath, 
                                     encoding=encoding, 
                                     delimiter=delim,

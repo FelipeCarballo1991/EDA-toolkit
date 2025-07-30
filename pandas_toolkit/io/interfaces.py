@@ -118,18 +118,19 @@ class DelimitedTextReader(FileReaderEncoding):
         for delim in self.delimiters:
             try:
                 if self.verbose:
-                    print(f"[DEBUG] Try with: encoding='{encoding}', delimiter='{delim}'")
+                    print(f"[DEBUG] Try with: encoding='{encoding}', delimiter='{delim}'")                
                 
-                if self.capture_bad_lines:                   
+                if self.capture_bad_lines:
+                    if self.verbose:
+                        print(f"[DEBUG] Detecting bad lines (Execution will be longer).")
+
                     df = pd.read_csv(filepath, 
                                     encoding=encoding, 
                                     delimiter=delim,
                                      engine = "python", 
                                     on_bad_lines=capturar_linea,
                                     **kwargs)
-                else:
-                    if self.verbose:
-                        print(f"[DEBUG] Detecting bad lines (Execution will be longer).")
+                else:                    
                     df = pd.read_csv(filepath, 
                                     encoding=encoding, 
                                     delimiter=delim,

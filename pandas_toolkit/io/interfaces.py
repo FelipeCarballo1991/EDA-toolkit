@@ -16,24 +16,23 @@ COMMON_ENCODINGS = [
 ]
 
 COMMON_DELIMITERS =[
-               ",",    # Comma
-                ";",    # Semicolon
-                "\t",   # Tab
-                "|",    # Pipe (vertical bar)
-                ":",    # Colon
-                "~",    # Tilde
-                "^",    # Caret
-                "#",    # Hash
-                " ",    # Space
-                "_",    # Underscore
-                "-",    # Dash / Hyphen
-                "/",    # Forward slash
-                "\\",   # Backslash
-                "*",    # Asterisk
-                "=",    # Equal sign
-                "'",    # Single quote
-                "\"",   # Double quote
-                     
+                    ",",    # Comma
+                    ";",    # Semicolon
+                    "\t",   # Tab
+                    "|",    # Pipe (vertical bar)
+                    ":",    # Colon
+                    "~",    # Tilde
+                    "^",    # Caret
+                    "#",    # Hash
+                    " ",    # Space
+                    "_",    # Underscore
+                    "-",    # Dash / Hyphen
+                    "/",    # Forward slash
+                    "\\",   # Backslash
+                    "*",    # Asterisk
+                    "=",    # Equal sign
+                    "'",    # Single quote
+                    "\"",   # Double quote                        
                 ]
 
 class NormalizeMixin:

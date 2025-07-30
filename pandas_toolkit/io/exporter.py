@@ -31,15 +31,24 @@ class FileExporter:
             part_filename = f"{filename_prefix}_part{i+1}.xlsx"
             self.to_excel(part_df, part_filename, **kwargs)
 
-    def to_excel_multiple_sheets(self, dfs: Dict[str, pd.DataFrame], filename: str, **kwargs):
+    def to_excel_multiple_sheets_from_df(self, df: pd.DataFrame, filename: str, max_rows: int = 1000000, **kwargs):
         """
-        Export multiple DataFrames into one Excel file using sheet names as keys.
+        Divide un DataFrame largo en múltiples hojas dentro de un mismo archivo Excel.
         """
         path = os.path.join(self.output_dir, filename)
+        total_rows = len(df)
+        num_parts = (total_rows // max_rows) + int(total_rows % max_rows > 0)
+
         with pd.ExcelWriter(path, engine="openpyxl") as writer:
-            for sheet_name, df in dfs.items():
-                df.to_excel(writer, sheet_name=sheet_name[:31], index=False, **kwargs)
-        self._log(f"Saved multi-sheet Excel to: {path}")
+            for i in range(num_parts):
+                start = i * max_rows
+                end = (i + 1) * max_rows
+                part_df = df.iloc[start:end]
+                sheet_name = f"Sheet{i+1}"
+                part_df.to_excel(writer, sheet_name=sheet_name, index=False, **kwargs)
+
+        self._log(f"Saved multi-sheet Excel from DataFrame to: {path}")
+
 
     def to_csv(self, df: pd.DataFrame, filename: str, **kwargs):
         """Export a DataFrame to a CSV file."""

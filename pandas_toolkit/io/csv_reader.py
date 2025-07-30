@@ -7,27 +7,28 @@ class CSVReader(DelimitedTextReader):
     def __init__(self, encodings=None, 
                  delimiters=None, 
                  verbose=False,
-                 capture_bad_lines = False,
-                 exporter: FileExporter = None,
-                 ):
+                 capture_bad_lines=False,
+                 output_dir=".",  # Nuevo parámetro
+                 exporter: FileExporter = None):
+        
         super().__init__(
             encodings=encodings,
             delimiters=delimiters,
             verbose=verbose,
-            capture_bad_lines = capture_bad_lines
+            capture_bad_lines=capture_bad_lines
         )
 
-        self.exporter = exporter or FileExporter(verbose=verbose)
-        # self.normalizer = exporter or NormalizeMixin()
+        # Usa el exporter que pasen o crea uno con el output_dir especificado
+        self.exporter = exporter or FileExporter(output_dir=output_dir, verbose=verbose)
 
-    def normalize(self,df):
+    def normalize(self, df):
         return super().normalize(df)
 
     def read_and_normalize(self, filepath, **kwargs):
         df = self.read(filepath, **kwargs)
         return self.normalize(df)
     
-    def export(self, df: pd.DataFrame, method="excel", **kwargs):
+    def export(self, df, method="excel", **kwargs):
         """Shortcut to export using the configured exporter."""
         if method == "excel":
             self.exporter.to_excel(df, **kwargs)

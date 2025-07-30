@@ -207,6 +207,9 @@ class DelimitedTextReader(FileReaderEncoding):
                     if self.verbose:
                         print(f"[INFO] Success with encoding='{encoding}', delimiter='{delim}'")
                     return df
+            
+            except FileNotFoundError as fnf_error:
+                raise FileNotFoundError(f"[ERROR] Archivo no encontrado: {filepath}") from fnf_error
 
             except Exception as e:
                 error_original = e
@@ -218,4 +221,4 @@ class DelimitedTextReader(FileReaderEncoding):
                     continue
 
         # If all attempts failed, raise a custom error
-        raise FileEncodingError(f"Error: {error_original}")
+        raise Exception(f"Error: {error_original}")

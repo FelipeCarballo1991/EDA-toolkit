@@ -118,7 +118,7 @@ class DelimitedTextReader(FileReaderEncoding):
         for delim in self.delimiters:
             try:
                 if self.verbose:
-                    print(f"[🔍] Intentando: encoding='{encoding}', delimiter='{delim}'")
+                    print(f"[DEBUG] Try with: encoding='{encoding}', delimiter='{delim}'")
                 
                 if self.capture_bad_lines:                   
                     df = pd.read_csv(filepath, 
@@ -129,7 +129,7 @@ class DelimitedTextReader(FileReaderEncoding):
                                     **kwargs)
                 else:
                     if self.verbose:
-                        print(f"[🔍] Detectando lineas erroneas (La ejecución puede durar más tiempo).")
+                        print(f"[DEBUG] Detecting bad lines (Execution will be longer).")
                     df = pd.read_csv(filepath, 
                                     encoding=encoding, 
                                     delimiter=delim,
@@ -141,7 +141,7 @@ class DelimitedTextReader(FileReaderEncoding):
                     self.success_encoding = encoding
                     self.success_delimiter = delim
                     if self.verbose:
-                        print(f"[✅] Lectura exitosa con encoding='{encoding}', delimiter='{delim}'")
+                        print(f"[INFO] Success with encoding='{encoding}', delimiter='{delim}'")
                     return df
             except Exception as e:
                 error_original = e
@@ -149,7 +149,7 @@ class DelimitedTextReader(FileReaderEncoding):
                     raise
                 elif isinstance(e, (ParserError, ValueError)):
                     if self.verbose:
-                        print(f"[⚠️] Falló con encoding='{encoding}', delimiter='{delim}'")
+                        print(f"[DEBUG] Fail with encoding='{encoding}', delimiter='{delim}'")
                     continue
                 # try:
         raise FileEncodingError(            

@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 import pandas as pd
 from pandas_toolkit.io.errors import FileEncodingError
 from pandas.errors import ParserError
+from pathlib import Path
 
 # ----------------------------------------------------------------------
 # Common encoding options to try when reading files
@@ -121,6 +122,13 @@ class FileReader(ABC, NormalizeMixin):
         """
         pass
 
+    def read_multiple_files(self, folderpath: str, **kwargs) -> pd.DataFrame:
+        """
+        Abstract method for reading multiple_files.
+        Must be implemented by subclasses.
+        """
+        pass
+
 # ----------------------------------------------------------------------
 # Base class for file readers that support multiple encodings
 # ----------------------------------------------------------------------
@@ -136,6 +144,26 @@ class FileReaderEncoding(FileReader):
         Should be implemented by subclasses.
         """
         pass
+
+    def read_multiple_files(self, folderpath, **kwargs) -> pd.DataFrame:
+        """
+        Read multiple files using read method.
+        """
+        loaded_tables = {}
+        working_dir = Path(folderpath)
+
+        i = 1
+        for archivo in working_dir.iterdir():
+            table = self.read(archivo)
+            loaded_tables["Part"+str(i)] = table
+            i+=1
+        
+        df = pd.concat(loaded_tables.values(), ignore_index=True)
+
+        return df
+
+
+
 
     def read(self, filepath: str, **kwargs) -> pd.DataFrame:
         """
@@ -206,10 +234,11 @@ class DelimitedTextReader(FileReaderEncoding):
                     self.success_delimiter = delim
                     if self.verbose:
                         print(f"[INFO] Success with encoding='{encoding}', delimiter='{delim}'")
+                        print(f"[INFO] File {filepath} contains {df.shape[0]} rows and {df.shape[1]} columns")
                     return df
             
             except FileNotFoundError as fnf_error:
-                raise FileNotFoundError(f"[ERROR] Archivo no encontrado: {filepath}") from fnf_error
+                raise FileNotFoundError(f"[ERROR] File not found: {filepath}") from fnf_error
 
             except Exception as e:
                 error_original = e

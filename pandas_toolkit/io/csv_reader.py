@@ -1,7 +1,7 @@
 # pandas_toolkit/io/readers.py
-from pandas_toolkit.io.interfaces import DelimitedTextReader, NormalizeMixin
+from pandas_toolkit.io.interfaces import DelimitedTextReader
 from pandas_toolkit.io.exporter import FileExporter
-import pandas as pd
+
 
 class CSVReader(DelimitedTextReader):
     def __init__(self, encodings=None, 

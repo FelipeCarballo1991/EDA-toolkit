@@ -145,7 +145,7 @@ class FileReaderEncoding(FileReader):
         """
         pass
 
-    def read_multiple_files(self, folderpath, **kwargs) -> pd.DataFrame:
+    def read_multiple_files(self, folderpath, **kwargs) -> dict:
         """
         Read multiple files using read method.
         """
@@ -154,13 +154,14 @@ class FileReaderEncoding(FileReader):
 
         i = 1
         for archivo in working_dir.iterdir():
+            nombre_archivo = archivo.stem
             table = self.read(archivo)
-            loaded_tables["Part"+str(i)] = table
+            loaded_tables[nombre_archivo] = table
             i+=1
         
-        df = pd.concat(loaded_tables.values(), ignore_index=True)
+        # df = pd.concat(loaded_tables.values(), ignore_index=True)
 
-        return df
+        return loaded_tables
 
 
 

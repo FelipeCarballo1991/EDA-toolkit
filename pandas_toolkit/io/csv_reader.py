@@ -37,6 +37,6 @@ class CSVReader(DelimitedTextReader):
         elif method == "excel_parts":
             self.exporter.to_excel_multiple_parts(df, **kwargs)
         elif method == "excel_sheets":
-            self.exporter.to_excel_multiple_sheets(df, **kwargs)
+            self.exporter.to_excel_multiple_sheets_from_df(df, **kwargs)
         else:
             raise ValueError(f"Unknown export method: {method}")

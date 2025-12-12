@@ -16,6 +16,7 @@ ENGINE_BY_EXTENSION = {
 class ExcelReader(FileReader):
 
     @staticmethod 
+    #coment
     def detect_engine_from_extension(filepath) -> str:
         ext = Path(filepath).suffix.lower()
         return ENGINE_BY_EXTENSION.get(ext, None)

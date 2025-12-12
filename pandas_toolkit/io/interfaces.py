@@ -129,6 +129,8 @@ class FileReader(ABC, NormalizeMixin):
         """
         pass
 
+    
+
 # ----------------------------------------------------------------------
 # Base class for file readers that support multiple encodings
 # ----------------------------------------------------------------------

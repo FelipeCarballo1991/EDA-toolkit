@@ -21,9 +21,7 @@ class CSVReader(DelimitedTextReader):
         # Usa el exporter que pasen o crea uno con el output_dir especificado
         self.exporter = exporter or FileExporter(output_dir=output_dir, verbose=verbose)
 
-    def normalize(self, df):
-        return super().normalize(df)
-
+    
     def read_and_normalize(self, filepath, **kwargs):
         df = self.read(filepath, **kwargs)
         return self.normalize(df)

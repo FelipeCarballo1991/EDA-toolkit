@@ -14,16 +14,17 @@ ENGINE_BY_EXTENSION = {
 }
 
 class ExcelReader(FileReader):
-
-    @staticmethod 
-    #coment
+    
+    @staticmethod    
     def detect_engine_from_extension(filepath) -> str:
         ext = Path(filepath).suffix.lower()
         return ENGINE_BY_EXTENSION.get(ext, None)
     
+    def read_and_normalize(self, filepath, **kwargs):
+        df = self.read(filepath, **kwargs)
+        return self.normalize(df)    
 
     def read(self,filepath,**kwargs) -> pd.DataFrame:
-
 
         eng = self.detect_engine_from_extension(filepath)
         df = pd.read_excel(filepath,engine=eng)

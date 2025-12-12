@@ -122,6 +122,7 @@ class FileReader(ABC, NormalizeMixin):
         """
         pass
 
+    @abstractmethod
     def read_multiple_files(self, folderpath: str, **kwargs) -> pd.DataFrame:
         """
         Abstract method for reading multiple_files.

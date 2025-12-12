@@ -45,10 +45,12 @@ def test_csvreader_read_multiple_files(tmp_path):
 
     reader = CSVReader()
 
-    df = reader.read_multiple_files(tmp_path)
+    tablas = reader.read_multiple_files(tmp_path)
 
-    assert df.shape == (2, 2)
-    assert df["x"].tolist() == [1, 3]
+    df_concatenado = pd.concat(tablas)
+
+    assert df_concatenado.shape == (2, 2)
+    assert df_concatenado["x"].tolist() == [1, 3]
 
 
 def test_csvreader_export_to_csv(tmp_path):

@@ -122,31 +122,13 @@ class FileReader(ABC, NormalizeMixin):
         """
         pass
 
-    @abstractmethod
-    def read_multiple_files(self, folderpath: str, **kwargs) -> pd.DataFrame:
-        """
-        Abstract method for reading multiple_files.
-        Must be implemented by subclasses.
-        """
-        pass
-
-    
-
-# ----------------------------------------------------------------------
-# Base class for file readers that support multiple encodings
-# ----------------------------------------------------------------------
-class FileReaderEncoding(FileReader):
-    def __init__(self, encodings=None):
-        # Set encoding list (or default to COMMON_ENCODINGS)
-        self.encodings = encodings or COMMON_ENCODINGS
-
-    @abstractmethod
-    def _read_with_encoding(self, filepath: str, encoding: str, **kwargs) -> pd.DataFrame:
-        """
-        Abstract method to try reading a file using a specific encoding.
-        Should be implemented by subclasses.
-        """
-        pass
+    # @abstractmethod
+    # def read_multiple_files(self, folderpath: str, **kwargs) -> pd.DataFrame:
+    #     """
+    #     Abstract method for reading multiple_files.
+    #     Must be implemented by subclasses.
+    #     """
+    #     pass
 
     def read_multiple_files(self, folderpath, **kwargs) -> dict:
         """
@@ -164,7 +146,41 @@ class FileReaderEncoding(FileReader):
         
         # df = pd.concat(loaded_tables.values(), ignore_index=True)
 
-        return loaded_tables
+        return loaded_tables    
+
+# ----------------------------------------------------------------------
+# Base class for file readers that support multiple encodings
+# ----------------------------------------------------------------------
+class FileReaderEncoding(FileReader):
+    def __init__(self, encodings=None):
+        # Set encoding list (or default to COMMON_ENCODINGS)
+        self.encodings = encodings or COMMON_ENCODINGS
+
+    @abstractmethod
+    def _read_with_encoding(self, filepath: str, encoding: str, **kwargs) -> pd.DataFrame:
+        """
+        Abstract method to try reading a file using a specific encoding.
+        Should be implemented by subclasses.
+        """
+        pass
+
+    # def read_multiple_files(self, folderpath, **kwargs) -> dict:
+    #     """
+    #     Read multiple files using read method.
+    #     """
+    #     loaded_tables = {}
+    #     working_dir = Path(folderpath)
+
+    #     i = 1
+    #     for archivo in working_dir.iterdir():
+    #         nombre_archivo = archivo.stem
+    #         table = self.read(archivo)
+    #         loaded_tables[nombre_archivo] = table
+    #         i+=1
+        
+    #     # df = pd.concat(loaded_tables.values(), ignore_index=True)
+
+    #     return loaded_tables
 
 
 

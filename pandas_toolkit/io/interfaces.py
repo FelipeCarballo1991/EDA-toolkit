@@ -5,6 +5,8 @@ import pandas as pd
 from pandas_toolkit.io.errors import FileEncodingError
 from pandas.errors import ParserError
 from pathlib import Path
+import re
+import unicodedata
 
 # ----------------------------------------------------------------------
 # Common encoding options to try when reading files
@@ -110,6 +112,26 @@ class NormalizeMixin:
 
         return df
 
+    def normalize_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        df = df.copy()
+
+        def clean(col: str) -> str:
+            col = col.strip().lower()
+
+            # Quitar acentos
+            col = unicodedata.normalize("NFKD", col)
+            col = col.encode("ascii", "ignore").decode("utf-8")
+
+            # Reemplazar espacios y separadores por _
+            col = re.sub(r"[^\w]+", "_", col)
+
+            # Quitar _ duplicados
+            col = re.sub(r"_+", "_", col)
+
+            return col.strip("_")
+
+        df.columns = [clean(c) for c in df.columns]
+        return df  
 # ----------------------------------------------------------------------
 # Abstract base class defining the interface for all file readers
 # ----------------------------------------------------------------------

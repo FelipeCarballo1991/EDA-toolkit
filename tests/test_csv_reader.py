@@ -117,3 +117,12 @@ def test_csvreader_read_and_normalize(tmp_path):
     assert "City_norm" in df.columns
     assert df.loc[0, "Name_norm"] == "juan"
     assert df.loc[0, "City_norm"] == "buenos aires"
+
+
+def test_normalize_columns():
+    df = pd.DataFrame(columns=["   Nombre y apellido   ", "Edad actual"])
+
+    reader = CSVReader()
+    df2 = reader.normalize_columns(df)
+
+    assert list(df2.columns) == ["nombre_y_apellido", "edad_actual"]

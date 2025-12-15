@@ -79,3 +79,41 @@ def test_csvreader_export_to_excel(tmp_path):
     loaded = pd.read_excel(output_file)
     assert loaded.shape == (2, 1)
 
+
+def test_csvreader_encoding_fallback(tmp_path):
+    # Texto con acento, guardado en latin1
+    content = "nombre,edad\nJosé,30"
+    p = tmp_path / "latin1.csv"
+    p.write_bytes(content.encode("latin1"))
+
+    reader = CSVReader(encodings=["utf-8", "latin1"])
+
+    df = reader.read(p)
+
+    assert df.iloc[0]["nombre"] == "José"
+
+
+def test_csvreader_delimiter_autodetect(tmp_path):
+    p = tmp_path / "semicolon.csv"
+    p.write_text("a;b;c\n1;2;3", encoding="utf-8")
+
+    reader = CSVReader(delimiters=[",", ";"])
+
+    df = reader.read(p)
+
+    assert df.shape == (1, 3)
+    assert list(df.columns) == ["a", "b", "c"]
+
+
+def test_csvreader_read_and_normalize(tmp_path):
+    p = tmp_path / "norm.csv"
+    p.write_text("Name,City\n  Juan  , Buenos Aires ")
+
+    reader = CSVReader()
+
+    df = reader.read_and_normalize(p)
+
+    assert "Name_norm" in df.columns
+    assert "City_norm" in df.columns
+    assert df.loc[0, "Name_norm"] == "juan"
+    assert df.loc[0, "City_norm"] == "buenos aires"

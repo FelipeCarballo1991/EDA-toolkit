@@ -155,3 +155,19 @@ def test_normalize_columns_uppercase():
         "EDAD",
         "EMPLOYEE_ID"
     ]
+
+def test_normalize_columns_keep_original_case():
+    df = pd.DataFrame(
+        columns=[
+            "   Nombre y Apellido   ",
+            "Edad"
+        ]
+    )
+
+    reader = CSVReader()
+    normalized = reader.normalize_columns(df, convert_case=None)
+
+    assert normalized.columns.tolist() == [
+        "Nombre_y_Apellido",
+        "Edad"
+    ]

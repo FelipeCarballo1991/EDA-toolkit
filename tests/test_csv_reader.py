@@ -171,3 +171,21 @@ def test_normalize_columns_keep_original_case():
         "Nombre_y_Apellido",
         "Edad"
     ]
+
+
+def test_normalize_columns_empty_and_duplicates():
+    df = pd.DataFrame(
+        columns=["Name", "  Name ", "###", "   ", "City", "City"]
+    )
+
+    reader = CSVReader()
+    result = reader.normalize_columns(df)
+
+    assert result.columns.tolist() == [
+        "name",
+        "name_1",
+        "unnamed",
+        "unnamed_1",
+        "city",
+        "city_1",
+    ]

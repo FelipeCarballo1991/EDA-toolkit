@@ -7,6 +7,7 @@ from pandas.errors import ParserError
 from pathlib import Path
 import re
 import unicodedata
+from collections import defaultdict
 
 # ----------------------------------------------------------------------
 # Common encoding options to try when reading files
@@ -112,7 +113,12 @@ class NormalizeMixin:
 
         return df
 
-    def normalize_columns(self, df: pd.DataFrame, convert_case: str = "lower") -> pd.DataFrame:
+    def normalize_columns(
+            self,
+            df: pd.DataFrame,
+            convert_case: str = "lower",
+            empty_col_name: str = "unnamed",
+        ) -> pd.DataFrame:
         """
         Normalize DataFrame column names by applying standardization transformations.
         
@@ -122,6 +128,8 @@ class NormalizeMixin:
         3. Replacing spaces and special characters with underscores
         4. Removing duplicate consecutive underscores
         5. Trimming leading/trailing underscores
+        6. Handling empty column names by renaming to a specified placeholder
+        7. Appending numeric suffixes to duplicate column names
         
         The original DataFrame is not modified; a copy with normalized columns is returned.
         
@@ -131,6 +139,8 @@ class NormalizeMixin:
             Input DataFrame whose column names need to be normalized.
         convert_case : str, default 'lower'
             Case conversion option: 'lower', 'upper', or None to keep original case.
+        empty_col_name : str, default 'unnamed'
+            Name to use for empty or unnamed columns.
         
         Returns
         -------
@@ -143,36 +153,57 @@ class NormalizeMixin:
             "First Name": [1, 2, 3],
             "Last  Name": [4, 5, 6],
             "Émployee-ID": [7, 8, 9],
-            "Department Code": [10, 11, 12]
+            "Department Code": [10, 11, 12],
+            "": [13, 14, 15],
+            "First Name": [16, 17, 18]
         })
         normalized = reader.normalize_columns(df)
         print(normalized.columns.tolist())
-        ['first_name', 'last_name', 'employee_id', 'department_code']
+        ['first_name', 'last_name', 'employee_id', 'department_code', 'unnamed', 'first_name_1']
         """
         df = df.copy()
 
         def clean(col: str) -> str:
-            col = col.strip()
-            
+            col = str(col).strip()
+
             # Apply case conversion
             if convert_case == "lower":
                 col = col.lower()
             elif convert_case == "upper":
                 col = col.upper()
 
-            # Remove accents using NFKD normalization
+            # Remove accents
             col = unicodedata.normalize("NFKD", col)
             col = col.encode("ascii", "ignore").decode("utf-8")
 
             # Replace spaces and special characters with underscores
             col = re.sub(r"[^\w]+", "_", col)
 
-            # Remove duplicate consecutive underscores
+            # Remove duplicate underscores
             col = re.sub(r"_+", "_", col)
 
             return col.strip("_")
 
-        df.columns = [clean(c) for c in df.columns]
+        cleaned_cols = [clean(c) for c in df.columns]
+
+        # Handle empty + duplicated column names
+        final_cols = []
+        seen = defaultdict(int)
+
+        for col in cleaned_cols:
+            # Empty column name
+            if not col:
+                col = empty_col_name
+
+            count = seen[col]
+            if count > 0:
+                final_cols.append(f"{col}_{count}")
+            else:
+                final_cols.append(col)
+
+            seen[col] += 1
+
+        df.columns = final_cols
         return df
 # ----------------------------------------------------------------------
 # Abstract base class defining the interface for all file readers

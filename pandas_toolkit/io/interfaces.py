@@ -112,12 +112,12 @@ class NormalizeMixin:
 
         return df
 
-    def normalize_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+    def normalize_columns(self, df: pd.DataFrame, convert_case: str = "lower") -> pd.DataFrame:
         """
         Normalize DataFrame column names by applying standardization transformations.
         
         This method cleans and standardizes all column names in a DataFrame by:
-        1. Converting to lowercase and stripping whitespace
+        1. Converting to lowercase/uppercase or keeping original case
         2. Removing accents and diacritical marks from characters
         3. Replacing spaces and special characters with underscores
         4. Removing duplicate consecutive underscores
@@ -129,6 +129,8 @@ class NormalizeMixin:
         ----------
         df : pd.DataFrame
             Input DataFrame whose column names need to be normalized.
+        convert_case : str, default 'lower'
+            Case conversion option: 'lower', 'upper', or None to keep original case.
         
         Returns
         -------
@@ -146,30 +148,17 @@ class NormalizeMixin:
         normalized = reader.normalize_columns(df)
         print(normalized.columns.tolist())
         ['first_name', 'last_name', 'employee_id', 'department_code']
-        
-        Transformations Applied
-        -----------------------
-        - "First Name" → "first_name"
-        - "Last  Name" → "last_name" (multiple spaces collapsed)
-        - "Émployee-ID" → "employee_id" (accent removed, hyphen replaced)
-        - "Department Code" → "department_code"
-        
-        Notes
-        -----
-        - Non-ASCII characters with accents (é, ñ, ü, etc.) are converted to ASCII equivalents
-        - All special characters and spaces become underscores
-        - Consecutive underscores are automatically deduplicated
-        - This method is useful for preparing data for database operations or ensuring 
-        consistency across multiple data sources with varying naming conventions
-        
-        See Also
-        --------
-        normalize : Normalize DataFrame cell values and structure
         """
         df = df.copy()
 
         def clean(col: str) -> str:
-            col = col.strip().lower()
+            col = col.strip()
+            
+            # Apply case conversion
+            if convert_case == "lower":
+                col = col.lower()
+            elif convert_case == "upper":
+                col = col.upper()
 
             # Remove accents using NFKD normalization
             col = unicodedata.normalize("NFKD", col)

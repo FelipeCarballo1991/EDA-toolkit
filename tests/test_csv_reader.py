@@ -119,10 +119,39 @@ def test_csvreader_read_and_normalize(tmp_path):
     assert df.loc[0, "City_norm"] == "buenos aires"
 
 
-def test_normalize_columns():
-    df = pd.DataFrame(columns=["   Nombre y apellido   ", "Edad actual"])
+def test_normalize_columns_lowercase():
+    df = pd.DataFrame(
+        columns=[
+            "   Nombre y Apellido   ",
+            "Edad",
+            "Émployee-ID"
+        ]
+    )
 
     reader = CSVReader()
-    df2 = reader.normalize_columns(df)
+    normalized = reader.normalize_columns(df, convert_case="lower")
 
-    assert list(df2.columns) == ["nombre_y_apellido", "edad_actual"]
+    assert normalized.columns.tolist() == [
+        "nombre_y_apellido",
+        "edad",
+        "employee_id"
+    ]
+
+
+def test_normalize_columns_uppercase():
+    df = pd.DataFrame(
+        columns=[
+            "   Nombre y Apellido   ",
+            "Edad",
+            "Émployee-ID"
+        ]
+    )
+
+    reader = CSVReader()
+    normalized = reader.normalize_columns(df, convert_case="upper")
+
+    assert normalized.columns.tolist() == [
+        "NOMBRE_Y_APELLIDO",
+        "EDAD",
+        "EMPLOYEE_ID"
+    ]

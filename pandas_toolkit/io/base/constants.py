@@ -49,3 +49,16 @@ COMMON_DELIMITERS = [
     "'",             # Single quote
     "\"",            # Double quote
 ]
+
+# Excel engines to try based on file format
+EXCEL_ENGINES = {
+    ".xlsx": ["openpyxl", "xlrd"],      # Modern Excel files
+    ".xls": ["xlrd", "openpyxl"],       # Legacy Excel files
+    "default": ["openpyxl", "xlrd"]     # Default fallback
+}
+
+# Engine availability per format (optimization: avoid trying unavailable engines)
+EXCEL_ENGINES_BY_FORMAT = {
+    ".xlsx": "openpyxl",    # Primary engine for modern Excel
+    ".xls": "xlrd"          # Primary engine for legacy Excel
+}

@@ -211,8 +211,8 @@ Tests.ipynb
 test.py
 personas_bad.csv
 personas_ok.csv
-test_csv_reader.py
+
 
 Testeos Jupyter
-tests
+# tests
 setup.py

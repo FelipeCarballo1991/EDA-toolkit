@@ -1,6 +1,6 @@
 import pandas as pd
 import pytest
-from pandas_toolkit.io.csv_reader import CSVReader
+from pandas_toolkit.io import CSVReader
 
 
 # =====================================================================
@@ -426,7 +426,7 @@ def test_normalize_columns_accents_removed():
     - Special Unicode characters are handled correctly
     """
     df = pd.DataFrame(
-        columns=["Prénombre", "Áge", "Código"]  # Cambié "Cóðigo" por "Código"
+        columns=["Prénombre", "Áge", "Código"]
     )
 
     reader = CSVReader()
@@ -523,7 +523,7 @@ def test_normalize_trim_strings():
     
     Verifies that:
     - Whitespace is trimmed from string values
-    - Values are converted to lowercase (by default)
+    - Values are converted to lowercase
     - Trimmed values appear in "_norm" columns
     """
     df = pd.DataFrame({
@@ -531,7 +531,7 @@ def test_normalize_trim_strings():
     })
 
     reader = CSVReader()
-    normalized = reader.normalize(df, trim_strings=True, convert_case="lower")  # Agregué convert_case="lower"
+    normalized = reader.normalize(df, trim_strings=True, convert_case="lower")
 
     assert normalized.loc[0, "Name_norm"] == "juan"
     assert normalized.loc[1, "Name_norm"] == "maria"

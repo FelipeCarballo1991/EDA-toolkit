@@ -1,662 +1,473 @@
-# EDA-toolkit - CSVReader
+# EDA-toolkit
 
-A robust Python library for reading, processing, and exporting CSV files with automatic encoding detection, delimiter discovery, and data normalization capabilities.
+A comprehensive Python toolkit for exploratory data analysis (EDA) with advanced file reading capabilities, automatic encoding detection, and data normalization features.
+
+## Table of Contents
+
+- [Features](#features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Core Components](#core-components)
+- [Usage Examples](#usage-examples)
+- [Advanced Features](#advanced-features)
+- [API Reference](#api-reference)
 
 ## Features
 
-### 🔍 Automatic Encoding Detection
-- Tries multiple encodings automatically (UTF-8, Latin-1, CP1252, ISO-8859-1, and 20+ more)
-- Gracefully handles files with mixed or uncommon encodings
-- Intelligently tracks which encoding was successful
-- Supports encoding fallback mechanism
+✨ **Smart File Reading**
+- Automatic encoding detection (UTF-8, Latin-1, Windows-1252, and more)
+- Automatic delimiter detection for delimited text files
+- Support for multiple formats: CSV, TSV, Excel, JSON, Pipe-delimited
 
-### 🎯 Automatic Delimiter Detection
-- Automatically detects the correct delimiter used in your CSV file
-- Supports common delimiters: comma, semicolon, tab, pipe, colon, and more
-- Prefers delimiters that produce more columns (intelligent heuristic)
-- Customizable delimiter lists for specific use cases
-- Tracks which delimiter was successfully used
+🔧 **Data Normalization**
+- Column name normalization (remove accents, standardize casing, remove special characters)
+- Cell value normalization (trim whitespace, case conversion)
+- Handle empty rows and columns
+- Duplicate column name detection
 
-### 🛡️ Bad Line Detection
-- Detects and captures malformed lines during file reading
-- Optional logging of problematic lines for debugging
-- Configurable behavior for handling corrupt data
-- Does not interrupt file reading on bad lines
+💾 **Flexible Export**
+- Export to CSV, Excel (single or multiple sheets)
+- Split large DataFrames across multiple files
+- Preserve data integrity through complete pipeline
 
-### 📊 Data Normalization
-- **Column Name Normalization**: Remove accents, standardize casing, handle duplicates
-- **Cell Value Normalization**: Trim whitespace, convert empty strings to None, normalize case
-- Drop empty rows and columns automatically
-- Create normalized versions without overwriting original data
-- Accents and diacritical marks are properly removed
-
-### 📁 Batch Operations
-- Read multiple CSV files from a directory at once
-- Export to multiple formats: CSV, Excel (single sheet, multiple parts, or multiple sheets)
-- Handle large datasets by splitting across multiple Excel files
-- Maintain consistency across batch operations
-
-### 🔄 Export Flexibility
-- Export to CSV format
-- Export to Excel with single or multiple sheets
-- Split large DataFrames across multiple Excel files (useful for Excel's row limits: 1,048,576)
-- Customizable output directory and verbose logging
-- Inherited by all subclasses for extensibility
-
-### 🏗️ Extensible Architecture
-- Template Method pattern for easy extension
-- Create custom readers by extending FileReader
-- Unified export interface across all reader types
-- Support for future formats (JSON, Excel, Parquet, etc.)
+🏭 **Factory Pattern**
+- Automatic reader selection based on file extension
+- Easy registration of custom readers
+- Extensible architecture
 
 ## Installation
 
 ```bash
-pip install -r requirements.txt
-```
+# Clone the repository
+git clone https://github.com/yourusername/EDA-toolkit.git
+cd EDA-toolkit
 
-### Requirements
-- pandas >= 2.3.1
-- numpy >= 2.3.1
-- openpyxl >= 3.1.5
+# Install dependencies
+pip install pandas openpyxl
 
-## Architecture
-
-### Class Hierarchy
-
-```
-FileReader (Abstract Base)
-    ├── read()                    # Template Method
-    ├── read_multiple_files()     # Batch operations
-    └── export()                  # Common export interface
-    
-    └── FileReaderEncoding (Abstract)
-        ├── _read()               # Try multiple encodings
-        └── _read_with_encoding() # Must implement
-        
-        └── DelimitedTextReader
-            ├── _read_with_encoding()  # Try multiple delimiters
-            
-            └── CSVReader             # CSV-specific reader
+# Install in development mode
+pip install -e .
 ```
 
 ## Quick Start
 
-### Basic Reading
+### Basic File Reading
 
 ```python
 from pandas_toolkit.io import CSVReader
 
-# Create a reader instance
+# Create a reader
 reader = CSVReader()
 
-# Read a CSV file (encoding and delimiter are auto-detected)
-df = reader.read("path/to/file.csv")
+# Read a CSV file
+df = reader.read("data.csv")
+
+# Read with normalization
+df = reader.read(
+    "data.csv",
+    normalize=True,              # Normalize cell values
+    normalize_columns=True       # Normalize column names
+)
+
+print(df.head())
 ```
 
-### Reading with Custom Encodings
+### Using the Factory
 
 ```python
-# Specify custom encodings to try (in order of preference)
-reader = CSVReader(encodings=["utf-8", "latin1", "cp1252", "iso-8859-1"])
-df = reader.read("path/to/file.csv")
+from pandas_toolkit.io import ReaderFactory
 
-# Check which encoding was used
-print(f"Used encoding: {reader.success_encoding}")
+# Factory automatically selects the correct reader
+factory = ReaderFactory()
+
+# Works with any supported format
+df_csv = factory.create_reader("data.csv").read("data.csv")
+df_excel = factory.create_reader("report.xlsx").read("report.xlsx")
+df_json = factory.create_reader("data.json").read("data.json")
+
+# Check supported formats
+print(factory.get_supported_extensions())
+# ['.csv', '.json', '.jsonl', '.pipe', '.tsv', '.xls', '.xlsx']
 ```
 
-### Reading with Custom Delimiters
+## Core Components
+
+### File Readers
+
+#### CSVReader
+Reads CSV files with automatic encoding and delimiter detection.
 
 ```python
-# Specify custom delimiters to try
-reader = CSVReader(delimiters=[";", "\t", "|", ","])
-df = reader.read("path/to/file.csv")
+from pandas_toolkit.io import CSVReader
 
-# Check which delimiter was used
-print(f"Used delimiter: {repr(reader.success_delimiter)}")
+reader = CSVReader(
+    encodings=["utf-8", "latin1", "cp1252"],  # Custom encodings to try
+    verbose=True                               # Show debug information
+)
+
+df = reader.read("data.csv")
+print(f"Detected encoding: {reader.success_encoding}")
+print(f"Detected delimiter: {reader.success_delimiter}")
 ```
 
-### Bad Line Detection
+#### TSVReader & PipeReader
+Specialized readers for tab-separated and pipe-separated values.
 
 ```python
-# Enable bad line capture for debugging
-reader = CSVReader(verbose=True, capture_bad_lines=True)
-df = reader.read("path/to/problematic_file.csv")
+from pandas_toolkit.io import TSVReader, PipeReader
 
-# Access captured bad lines
-print(f"Found {len(reader.bad_lines)} bad lines")
-for line in reader.bad_lines[:5]:
-    print(line)
+# Read TSV files
+tsv_reader = TSVReader()
+df = tsv_reader.read("data.tsv")
+
+# Read pipe-delimited files
+pipe_reader = PipeReader()
+df = pipe_reader.read("data.pipe")
+```
+
+#### ExcelReader
+Read single or multiple sheets from Excel workbooks.
+
+```python
+from pandas_toolkit.io import ExcelReader
+
+reader = ExcelReader()
+
+# Read specific sheet
+df = reader.read("report.xlsx", sheet_name="Sales")
+
+# Get all sheet names
+sheets = reader.read_sheet_names("report.xlsx")
+print(sheets)  # ['Sales', 'Inventory', 'Customers']
+
+# Read multiple sheets
+data = reader.read_multiple_sheets("report.xlsx")
+for sheet_name, df in data.items():
+    print(f"{sheet_name}: {df.shape}")
+```
+
+#### JSONReader
+Read JSON and JSONL (JSON Lines) formatted files.
+
+```python
+from pandas_toolkit.io import JSONReader
+
+reader = JSONReader()
+
+# Read JSON file
+df = reader.read("data.json", orient="records")
+
+# Read JSONL (streaming format)
+df = reader.read_lines("streaming_data.jsonl")
 ```
 
 ## Usage Examples
 
-### Normalize During Reading
+### Example 1: Reading Messy Data
 
 ```python
+from pandas_toolkit.io import CSVReader
+
 reader = CSVReader(verbose=True)
 
-# Read file and normalize column names in one call
-df = reader.read("data.csv", normalize_columns=True)
-
-# The returned DataFrame contains normalized column names
-print(df.columns)
-# Output: ['col1', 'col2', 'col3']
-```
-
-### Normalize Column Names
-
-```python
-import pandas as pd
-
-# Create a DataFrame with messy column names
-df = pd.DataFrame({
-    "First Name": [1, 2, 3],
-    "Last  Name": [4, 5, 6],
-    "Émployee-ID": [7, 8, 9]
-})
-
-reader = CSVReader()
-
-# Normalize column names to lowercase with underscores
-normalized_df = reader.normalize_columns(df, convert_case="lower")
-print(normalized_df.columns.tolist())
-# Output: ['first_name', 'last_name', 'employee_id']
-```
-
-### Handle Duplicate and Empty Columns
-
-```python
-df = pd.DataFrame({
-    "Name": [1, 2],
-    "Name": [3, 4],  # Duplicate
-    "": [5, 6]       # Empty name
-})
-
-reader = CSVReader()
-normalized_df = reader.normalize_columns(df)
-print(normalized_df.columns.tolist())
-# Output: ['name', 'name_1', 'unnamed']
-```
-
-### Normalize Cell Values
-
-```python
-df = pd.DataFrame({
-    "Name": ["  JUAN  ", "  MARIA  "],
-    "Status": ["  ACTIVE  ", "  INACTIVE  "]
-})
-
-reader = CSVReader()
-
-# Normalize values (creates _norm columns)
-normalized_df = reader.normalize(
-    df, 
-    trim_strings=True, 
-    convert_case="lower"
+# File with problematic encoding and messy column names
+df = reader.read(
+    "messy_data.csv",
+    normalize=True,
+    normalize_columns=True
 )
 
-print(normalized_df.columns)
-# Output: ['Name', 'Status', 'Name_norm', 'Status_norm']
+# Original columns: ["   First Name   ", "Last  Name", "Émployee-ID"]
+# Normalized columns: ["first_name", "last_name", "employee_id"]
 
-print(normalized_df['Name_norm'].tolist())
-# Output: ['juan', 'maria']
+print(df.columns)
 ```
 
-### Read and Normalize in One Step
+### Example 2: Batch Processing Files
 
 ```python
-reader = CSVReader(verbose=True)
+from pandas_toolkit.io import CSVReader
 
-# Read file with both column and value normalization
-df = reader.read("data.csv", normalize=True, normalize_columns=True)
-
-# DataFrame has:
-# - Normalized column names (lowercase, underscores, no accents)
-# - Original columns preserved
-# - New "_norm" columns with normalized values
-```
-
-### Read Multiple Files
-
-```python
 reader = CSVReader()
 
 # Read all CSV files from a directory
-files_dict = reader.read_multiple_files("path/to/folder/")
-
-# Each file is loaded as a separate DataFrame
-for filename, df in files_dict.items():
-    print(f"{filename}: {df.shape}")
-
-# Concatenate all files if needed
-import pandas as pd
-combined_df = pd.concat(files_dict.values(), ignore_index=True)
-```
-
-### Read Multiple Files with Normalization
-
-```python
-reader = CSVReader()
-
-# Read all files and normalize them
-files_dict = reader.read_multiple_files(
+files = reader.read_multiple_files(
     "data_folder/",
     normalize=True,
     normalize_columns=True
 )
 
-# All files are normalized automatically
-for filename, df in files_dict.items():
-    print(f"{filename}: {df.columns.tolist()}")
+# Process each file
+for filename, df in files.items():
+    print(f"Processing {filename}...")
+    print(f"  Shape: {df.shape}")
+    print(f"  Columns: {df.columns.tolist()}")
 ```
 
-### Export to CSV
+### Example 3: Data Export
 
 ```python
-reader = CSVReader(output_dir="exports", verbose=True)
+from pandas_toolkit.io import CSVReader
 
-# Read and process your data
-df = reader.read("input.csv")
+reader = CSVReader(output_dir="exports")
+
+df = reader.read("data.csv")
 
 # Export to CSV
 reader.export(df, method="csv", filename="output.csv")
-```
 
-### Export to Excel
-
-```python
-reader = CSVReader(output_dir="exports", verbose=True)
-
-# Single-sheet Excel file
+# Export to Excel
 reader.export(df, method="excel", filename="report.xlsx")
-```
 
-### Export Large DataFrames - Multiple Parts
-
-```python
-reader = CSVReader(output_dir="exports", verbose=True)
-
-# Split a large DataFrame into multiple Excel files
-# (useful if DataFrame exceeds Excel's row limit of 1,048,576)
-reader.export(
-    df,
-    method="excel_parts",
-    filename_prefix="report",
-    max_rows=1000000
-)
-# Output: report_part1.xlsx, report_part2.xlsx, report_part3.xlsx
-```
-
-### Export Large DataFrames - Multiple Sheets
-
-```python
-reader = CSVReader(output_dir="exports", verbose=True)
-
-# Split a large DataFrame into multiple sheets within one Excel file
+# Export to multiple Excel sheets (for large files)
 reader.export(
     df,
     method="excel_sheets",
-    filename="report.xlsx",
-    max_rows=50000
+    filename="large_report.xlsx",
+    max_rows=5000
 )
-# Output: Single file with Sheet1, Sheet2, Sheet3, etc.
+
+# Export to multiple Excel files
+reader.export(
+    df,
+    method="excel_parts",
+    filename_prefix="data",
+    max_rows=10000
+)
+# Creates: data_part1.xlsx, data_part2.xlsx, etc.
 ```
 
-## Advanced Configuration
-
-### Full Example with All Options
+### Example 4: Column Name Normalization
 
 ```python
-reader = CSVReader(
-    encodings=["utf-8", "utf-8-sig", "latin1", "cp1252", "iso-8859-1"],
-    delimiters=[",", ";", "\t", "|"],
-    verbose=True,                          # Print debug information
-    capture_bad_lines=True,               # Capture malformed lines
-    output_dir="outputs"                  # Directory for exports
-)
+from pandas_toolkit.io import CSVReader
+import pandas as pd
 
-# Read file with encoding/delimiter auto-detection
-df = reader.read("raw_data.csv")
-print(f"Encoding: {reader.success_encoding}")
-print(f"Delimiter: {repr(reader.success_delimiter)}")
+reader = CSVReader()
+
+# Create sample DataFrame with messy columns
+df = pd.DataFrame({
+    "   First Name   ": ["Juan", "Maria"],
+    "Last  Name": ["García", "López"],
+    "Émployee-ID": ["E001", "E002"]
+})
 
 # Normalize column names
-df = reader.read("raw_data.csv", normalize_columns=True)
+df_normalized = reader.normalize_columns(df, convert_case="lower")
 
-# Normalize cell values
-df = reader.normalize(
-    df, 
-    drop_empty_cols=True, 
-    drop_empty_rows=True,
-    trim_strings=True,
-    convert_case="lower"
-)
+print(df_normalized.columns)
+# ['first_name', 'last_name', 'employee_id']
 
-# Export results
-reader.export(df, method="excel", filename="cleaned_data.xlsx")
+# Preserve original case
+df_normalized = reader.normalize_columns(df, convert_case=None)
+print(df_normalized.columns)
+# ['First_Name', 'Last_Name', 'Employee_ID']
 ```
 
-### Normalize Method Options
+### Example 5: Cell Value Normalization
 
 ```python
+from pandas_toolkit.io import CSVReader
+import pandas as pd
+
+reader = CSVReader()
+
+# Create sample DataFrame with messy values
+df = pd.DataFrame({
+    "Name": ["  JUAN  ", "  MARIA  "],
+    "Status": ["  ACTIVE  ", "  INACTIVE  "]
+})
+
+# Create normalized columns (with "_norm" suffix)
 df_normalized = reader.normalize(
     df,
-    drop_empty_cols=True,      # Remove columns with all NaN values
-    drop_empty_rows=True,      # Remove rows with all NaN values
-    trim_strings=True,         # Strip whitespace from strings
-    convert_case="lower"       # 'lower', 'upper', or None
-)
-```
-
-### Normalize Columns Method Options
-
-```python
-df_normalized = reader.normalize_columns(
-    df,
-    convert_case="lower",           # 'lower', 'upper', or None
-    empty_col_name="unnamed"        # Name for empty columns
-)
-```
-
-### Read Method Options
-
-```python
-df = reader.read(
-    "path/to/file.csv",
-    normalize=False,                # Normalize cell values
-    normalize_columns=False,        # Normalize column names
-    # Additional pandas read_csv arguments:
-    skiprows=0,                     # Skip first N rows
-    nrows=1000,                     # Read only first N rows
-    dtype={'col1': str}             # Specify column types
-)
-```
-
-## API Reference
-
-### CSVReader Class
-
-#### Constructor
-
-```python
-CSVReader(
-    encodings=None,           # List of encodings to try (default: COMMON_ENCODINGS)
-    delimiters=None,          # List of delimiters to try (default: COMMON_DELIMITERS)
-    verbose=False,            # Enable debug output
-    capture_bad_lines=False,  # Capture malformed lines
-    output_dir=".",           # Output directory for exports
-    exporter=None            # Custom FileExporter instance
-)
-```
-
-#### Methods
-
-| Method | Description |
-|--------|-------------|
-| `read(filepath, normalize=False, normalize_columns=False, **kwargs)` | Read a CSV file with optional normalization |
-| `read_multiple_files(folderpath, **kwargs)` | Read all CSV files from a directory |
-| `normalize(df, drop_empty_cols=False, drop_empty_rows=False, trim_strings=True, convert_case="lower")` | Normalize cell values in a DataFrame |
-| `normalize_columns(df, convert_case="lower", empty_col_name="unnamed")` | Normalize column names |
-| `export(df, method="excel", **kwargs)` | Export DataFrame to various formats |
-
-#### Properties
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `success_encoding` | str | The encoding that was successfully used to read the file |
-| `success_delimiter` | str | The delimiter that was successfully used to parse the file |
-| `bad_lines` | list | Captured malformed lines (if `capture_bad_lines=True`) |
-
-### Export Methods
-
-#### CSV Export
-
-```python
-reader.export(df, method="csv", filename="output.csv")
-```
-
-#### Excel Export (Single Sheet)
-
-```python
-reader.export(df, method="excel", filename="report.xlsx")
-```
-
-#### Excel Export (Multiple Files)
-
-```python
-reader.export(
-    df, 
-    method="excel_parts", 
-    filename_prefix="report",
-    max_rows=1000000
-)
-```
-
-#### Excel Export (Multiple Sheets in One File)
-
-```python
-reader.export(
-    df, 
-    method="excel_sheets", 
-    filename="report.xlsx",
-    max_rows=50000
-)
-```
-
-## Common Use Cases
-
-### Use Case 1: Clean and Standardize a CSV File
-
-```python
-reader = CSVReader(verbose=True, output_dir="cleaned_data")
-
-# Read with auto-detection
-df = reader.read("messy_data.csv")
-
-# Normalize everything
-df = reader.read("messy_data.csv", normalize_columns=True, normalize=True)
-
-# Export cleaned version
-reader.export(df, method="excel", filename="clean_data.xlsx")
-```
-
-### Use Case 2: Merge Multiple CSV Files
-
-```python
-reader = CSVReader(output_dir="merged_data")
-
-# Read all files from a folder with normalization
-files = reader.read_multiple_files(
-    "raw_data_folder/",
-    normalize_columns=True
+    trim_strings=True,
+    convert_case="lower",
+    drop_empty_rows=False,
+    drop_empty_cols=False
 )
 
-# Combine them
-merged_df = pd.concat(files.values(), ignore_index=True)
+print(df_normalized.columns)
+# ['Name', 'Status', 'Name_norm', 'Status_norm']
 
-# Export result
-reader.export(merged_df, method="excel", filename="merged.xlsx")
+print(df_normalized['Name_norm'].tolist())
+# ['juan', 'maria']
 ```
 
-### Use Case 3: Handle Large Files
+## Advanced Features
+
+### Custom Encoding Detection
 
 ```python
-reader = CSVReader(output_dir="exports")
+from pandas_toolkit.io import CSVReader
 
-# Read large file
-large_df = reader.read("very_large_file.csv")
-
-# Process it...
-
-# Export in multiple parts to avoid Excel row limits
-reader.export(
-    large_df,
-    method="excel_parts",
-    filename_prefix="large_report",
-    max_rows=1000000
-)
-```
-
-### Use Case 4: Handle Non-Standard Encodings
-
-```python
-# Japanese encoded CSV
+# Define custom encoding priority
 reader = CSVReader(
-    encodings=["utf-8", "shift_jis", "euc-jp"],
-    verbose=True
+    encodings=["utf-8-sig", "utf-8", "iso-8859-1", "cp1252"]
 )
-df = reader.read("japanese_data.csv")
-print(f"Successfully read with encoding: {reader.success_encoding}")
+
+df = reader.read("data.csv")
+print(f"Successfully decoded with: {reader.success_encoding}")
 ```
 
-### Use Case 5: Process CSV with Custom Delimiters
+### Capturing Bad Lines
 
 ```python
-# Pipe-delimited file
-reader = CSVReader(delimiters=["|", ",", ";"])
-df = reader.read("pipe_delimited.txt")
-print(f"Successfully read with delimiter: {repr(reader.success_delimiter)}")
+from pandas_toolkit.io import CSVReader
 
-# Export to standard CSV
-reader.export(df, method="csv", filename="converted.csv")
+reader = CSVReader(capture_bad_lines=True, verbose=True)
+
+df = reader.read("problematic_data.csv")
+
+# Access captured bad lines
+print(f"Found {len(reader.bad_lines)} bad lines")
+for line in reader.bad_lines:
+    print(line)
 ```
 
-### Use Case 6: Batch Process Directory with Normalization
+### Registering Custom Readers
 
 ```python
-reader = CSVReader(output_dir="processed", verbose=True)
+from pandas_toolkit.io import ReaderFactory, FileReader
+import pandas as pd
 
-# Read and normalize all CSV files
-files = reader.read_multiple_files(
-    "raw_data/",
+class ParquetReader(FileReader):
+    """Custom reader for Parquet files"""
+    
+    def _read(self, filepath: str, **kwargs) -> pd.DataFrame:
+        return pd.read_parquet(filepath, **kwargs)
+    
+    def _get_file_extensions(self) -> list:
+        return ['.parquet']
+
+# Register the custom reader
+factory = ReaderFactory()
+factory.register_reader(".parquet", ParquetReader)
+
+# Now use it
+reader = factory.create_reader("data.parquet")
+df = reader.read("data.parquet")
+```
+
+### Complete Pipeline
+
+```python
+from pandas_toolkit.io import ReaderFactory
+
+# 1. Create factory
+factory = ReaderFactory()
+
+# 2. Read file with automatic format detection
+reader = factory.create_reader("data.xlsx")
+df = reader.read(
+    "data.xlsx",
     normalize=True,
     normalize_columns=True
 )
 
-# Export each normalized file
-for filename, df in files.items():
-    reader.export(
-        df, 
-        method="excel", 
-        filename=f"{filename}_processed.xlsx"
-    )
+# 3. Process data
+df['total'] = df['price'] * df['quantity']
+
+# 4. Export results
+reader.export(df, method="excel", filename="processed_report.xlsx")
+
+print(f"✓ Successfully processed {df.shape[0]} rows")
 ```
 
-## Troubleshooting
+## API Reference
 
-### FileEncodingError: "Could not read {filepath} with any of the following encodings"
-
-The file uses an encoding not in your encoding list. Try adding more encodings:
+### ReaderFactory
 
 ```python
-reader = CSVReader(
-    encodings=[
-        "utf-8", "utf-8-sig", "latin1", "cp1252", 
-        "iso-8859-1", "shift_jis", "euc-jp", "big5"
-    ]
-)
-df = reader.read("file.csv")
-```
-
-### Delimiter Not Detected Correctly
-
-If the auto-detection chooses the wrong delimiter, explicitly specify it:
-
-```python
-reader = CSVReader(delimiters=["|", ";", "\t", ","])
-df = reader.read("file.csv")
-print(f"Used delimiter: {repr(reader.success_delimiter)}")
-```
-
-### Bad Lines Warnings
-
-Enable bad line capture to identify and debug problematic rows:
-
-```python
-reader = CSVReader(verbose=True, capture_bad_lines=True)
-df = reader.read("file.csv")
-print(f"Found {len(reader.bad_lines)} bad lines")
-for i, line in enumerate(reader.bad_lines[:10]):  # Show first 10
-    print(f"Line {i}: {line}")
-```
-
-### Column Names Not Normalized Correctly
-
-If accent removal doesn't work as expected:
-
-```python
-# Check original column names
-df = reader.read("file.csv")
-print(df.columns.tolist())
-
-# Try explicit normalization with convert_case
-normalized = reader.normalize_columns(df, convert_case="lower")
-print(normalized.columns.tolist())
-```
-
-### Memory Issues with Large Files
-
-If you encounter memory issues with very large CSVs:
-
-```python
-# Read in chunks using pandas parameters
-df = reader.read("large_file.csv", nrows=100000)
-
-# Or export in multiple parts
-reader.export(
-    df,
-    method="excel_parts",
-    filename_prefix="large",
-    max_rows=500000
-)
-```
-
-## Performance Tips
-
-1. **Use `verbose=False` in production** - Debug output has overhead
-2. **Specify encodings explicitly** if known - Reduces encoding attempts
-3. **Specify delimiters explicitly** if known - Reduces delimiter attempts
-4. **Use `capture_bad_lines=False` by default** - Exception handling has overhead
-5. **For very large files**, consider splitting before processing
-6. **Cache the reader instance** to reuse encoding/delimiter detection results
-
-## Advanced: Creating Custom Readers
-
-The architecture supports creating custom readers for other formats:
-
-```python
-from pandas_toolkit.io.interfaces import FileReader
-import pandas as pd
-
-class JSONReader(FileReader):
-    """Custom reader for JSON files."""
+class ReaderFactory:
+    @classmethod
+    def create_reader(filepath, output_dir=".", verbose=False, **kwargs) -> FileReader
     
-    def _read(self, filepath: str, **kwargs) -> pd.DataFrame:
-        """Implement JSON-specific reading logic."""
-        return pd.read_json(filepath, **kwargs)
-
-# Use it like any other reader
-reader = JSONReader(output_dir="exports")
-df = reader.read("data.json", normalize_columns=True)
-reader.export(df, method="excel", filename="output.xlsx")
+    @classmethod
+    def get_supported_extensions() -> list
+    
+    @classmethod
+    def register_reader(extension, reader_class)
 ```
 
-## Supported Encodings
+### FileReader (Base Class)
 
-UTF-8, UTF-8-SIG, CP1252, Latin-1, ISO-8859-1, UTF-16, UTF-16-LE, UTF-16-BE, UTF-32, UTF-32-LE, UTF-32-BE, CP1250, CP1251, CP1253, CP1254, CP932, Shift-JIS, EUC-JP, EUC-KR, Big5, GB2312, Mac-Roman, ASCII
+```python
+class FileReader:
+    def read(filepath, normalize=False, normalize_columns=False, **kwargs) -> pd.DataFrame
+    
+    def read_multiple_files(folderpath, **kwargs) -> dict
+    
+    def normalize_columns(df, convert_case="lower", empty_col_name="unnamed") -> pd.DataFrame
+    
+    def normalize(df, drop_empty_cols=False, drop_empty_rows=False, 
+                  trim_strings=True, convert_case="lower") -> pd.DataFrame
+    
+    def export(df, method="excel", **kwargs)
+```
 
-## Supported Delimiters
+### FileExporter
 
-Comma (,), Semicolon (;), Tab (\t), Pipe (|), Colon (:), Tilde (~), Caret (^), Hash (#), Space, Underscore (_), Hyphen (-), Forward Slash (/), Backslash (\), Asterisk (*), Equals (=), Single Quote ('), Double Quote (")
+```python
+class FileExporter:
+    def export(df, method="excel", **kwargs)
+    
+    # Methods
+    # - "csv": Export to single CSV file
+    # - "excel": Export to single Excel file
+    # - "excel_parts": Export to multiple Excel files
+    # - "excel_sheets": Export to single Excel with multiple sheets
+```
 
-## License
+## Supported File Formats
 
-See LICENSE file for details.
+| Format | Reader | Extensions |
+|--------|--------|-----------|
+| CSV | CSVReader | `.csv` |
+| TSV | TSVReader | `.tsv` |
+| Pipe-delimited | PipeReader | `.pipe` |
+| Excel | ExcelReader | `.xlsx`, `.xls` |
+| JSON | JSONReader | `.json`, `.jsonl` |
+
+## Error Handling
+
+```python
+from pandas_toolkit.io import CSVReader, FileEncodingError
+
+reader = CSVReader(encodings=["ascii"])
+
+try:
+    df = reader.read("non_ascii_file.csv")
+except FileEncodingError as e:
+    print(f"Could not decode file: {e}")
+    print("Try with different encodings")
+```
 
 ## Contributing
 
-Contributions are welcome! Please ensure:
-- All tests pass: `pytest tests/`
-- Code is properly documented with docstrings
-- Follow the existing code style and architecture
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Changelog
+
+### Version 1.0.0 (Current)
+- ✨ Initial release with core file reading capabilities
+- 🔧 Automatic encoding detection with fallback mechanism
+- 🔧 Automatic delimiter detection for delimited files
+- 💾 Data normalization for columns and values
+- 💾 Multiple export formats (CSV, Excel with multiple sheets/files)
+- 🏭 Factory pattern for reader selection
+- 📚 Comprehensive documentation and examples
+
+## Contact
+
+For questions or issues, please open an issue on GitHub

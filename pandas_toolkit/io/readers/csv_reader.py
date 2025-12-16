@@ -1,6 +1,5 @@
-# pandas_toolkit/io/readers.py
 import pandas as pd
-from pandas_toolkit.io.interfaces import DelimitedTextReader
+from pandas_toolkit.io.base import DelimitedTextReader
 from pandas_toolkit.io.exporter import FileExporter
 
 
@@ -48,6 +47,11 @@ class CSVReader(DelimitedTextReader):
             Output directory for exported files.
         exporter : FileExporter, optional
             Custom FileExporter instance. If None, creates one with output_dir.
+        
+        Examples
+        --------
+        >>> reader = CSVReader(verbose=True, output_dir="exports")
+        >>> df = reader.read("data.csv")
         """
         super().__init__(
             encodings=encodings,
@@ -57,20 +61,3 @@ class CSVReader(DelimitedTextReader):
             output_dir=output_dir,
             exporter=exporter or FileExporter(output_dir=output_dir, verbose=verbose)
         )
-
-    def read_and_normalize(self, filepath, **kwargs):
-        df = self.read(filepath, **kwargs)
-        return self.normalize(df)
-    
-    def export(self, df, method="excel", **kwargs):
-        """Shortcut to export using the configured exporter."""
-        if method == "excel":
-            self.exporter.to_excel(df, **kwargs)
-        elif method == "csv":
-            self.exporter.to_csv(df, **kwargs)
-        elif method == "excel_parts":
-            self.exporter.to_excel_multiple_parts(df, **kwargs)
-        elif method == "excel_sheets":
-            self.exporter.to_excel_multiple_sheets_from_df(df, **kwargs)
-        else:
-            raise ValueError(f"Unknown export method: {method}")

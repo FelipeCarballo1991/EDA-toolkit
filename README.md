@@ -38,11 +38,23 @@ A comprehensive Python toolkit for exploratory data analysis (EDA) with advanced
 
 ## Installation
 
+### From GitHub (Recommended)
+
+Install directly from the GitHub repository:
+
+```bash
+# Install the latest version
+pip install git+https://github.com/FelipeCarballo1991/EDA-toolkit.git
+
+# Install a specific version (using tags)
+pip install git+https://github.com/FelipeCarballo1991/EDA-toolkit.git@v0.1.0
+```
+
 ### From Source
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/EDA-toolkit.git
+git clone https://github.com/FelipeCarballo1991/EDA-toolkit.git
 cd EDA-toolkit
 
 # Install the package
@@ -53,7 +65,7 @@ pip install .
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/EDA-toolkit.git
+git clone https://github.com/FelipeCarballo1991/EDA-toolkit.git
 cd EDA-toolkit
 
 # Create a virtual environment

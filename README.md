@@ -17,7 +17,7 @@ A comprehensive Python toolkit for exploratory data analysis (EDA) with advanced
 ✨ **Smart File Reading**
 - Automatic encoding detection (UTF-8, Latin-1, Windows-1252, and more)
 - Automatic delimiter detection for delimited text files
-- Support for multiple formats: CSV, TSV, Excel, JSON, Pipe-delimited
+- Support for multiple formats: CSV, TSV, Excel, JSON, Pipe-delimited, HTML
 
 🔧 **Data Normalization**
 - Column name normalization (remove accents, standardize casing, remove special characters)
@@ -87,7 +87,7 @@ df_json = factory.create_reader("data.json").read("data.json")
 
 # Check supported formats
 print(factory.get_supported_extensions())
-# ['.csv', '.json', '.jsonl', '.pipe', '.tsv', '.xls', '.xlsx']
+# ['.csv', '.html', '.htm', '.json', '.jsonl', '.pipe', '.tsv', '.xls', '.xlsx']
 ```
 
 ## Core Components
@@ -159,6 +159,41 @@ df = reader.read("data.json", orient="records")
 
 # Read JSONL (streaming format)
 df = reader.read_lines("streaming_data.jsonl")
+```
+
+#### HTMLReader
+Read HTML files containing multiple tables (Oracle exports, web tables, etc.).
+
+```python
+from pandas_toolkit.io import HTMLReader
+
+reader = HTMLReader(verbose=True)
+
+# Read first table by default
+df = reader.read("oracle_export.html")
+
+# Read specific table by index
+df0 = reader.read("oracle_export.html", table_index=0)
+df1 = reader.read("oracle_export.html", table_index=1)
+df2 = reader.read("oracle_export.html", table_index=2)
+
+# Get count of tables
+count = reader.get_tables_count("oracle_export.html")
+print(f"Found {count} tables")
+
+# Read all tables as list
+tables = reader.read_all_tables("oracle_export.html")
+for i, df in enumerate(tables):
+    print(f"Table {i}: {df.shape}")
+
+# Read specific tables as dictionary
+tables = reader.read_multiple_tables(
+    "oracle_export.html",
+    table_indices=[0, 2, 5]
+)
+df0 = tables[0]
+df2 = tables[2]
+df5 = tables[5]
 ```
 
 ## Usage Examples

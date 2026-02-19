@@ -216,3 +216,15 @@ personas_ok.csv
 Testeos Jupyter
 # tests
 setup.py
+
+#UML
+.$UML.drawio.dtmp
+.$UML.drawio.bkp
+
+#Exports
+exports/
+
+#Miscelaneous
+ejemplo_oracle.py
+HTMLREADER_SUMMARY.md
+test_html_reader.py

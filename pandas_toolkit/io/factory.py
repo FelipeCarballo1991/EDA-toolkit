@@ -1,5 +1,5 @@
 from pathlib import Path
-from pandas_toolkit.io.readers import CSVReader, TSVReader, PipeReader, ExcelReader, JSONReader
+from pandas_toolkit.io.readers import CSVReader, TSVReader, PipeReader, ExcelReader, JSONReader, HTMLReader
 from pandas_toolkit.io.base import FileReader
 
 
@@ -31,6 +31,8 @@ class ReaderFactory:
         ".json": JSONReader,
         ".jsonl": JSONReader,
         ".pipe": PipeReader,
+        ".html": HTMLReader,
+        ".htm": HTMLReader,
     }
     
     @classmethod

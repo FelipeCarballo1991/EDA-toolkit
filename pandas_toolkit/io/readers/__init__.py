@@ -3,6 +3,7 @@ from .tsv_reader import TSVReader
 from .pipe_reader import PipeReader
 from .excel_reader import ExcelReader
 from .json_reader import JSONReader
+from .html_reader import HTMLReader
 
 __all__ = [
     "CSVReader",
@@ -10,4 +11,5 @@ __all__ = [
     "PipeReader",
     "ExcelReader",
     "JSONReader",
+    "HTMLReader",
 ]

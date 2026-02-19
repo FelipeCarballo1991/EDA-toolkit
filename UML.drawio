@@ -1,0 +1,210 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.3.0 Chrome/140.0.7339.249 Electron/38.7.2 Safari/537.36" version="29.3.0">
+  <diagram name="EDA-toolkit Class Diagram" id="I7550gyQkBr5H01SfvKf">
+    <mxGraphModel dx="1123" dy="1903" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="EY4MimpLL5ln4E1jZa24-51" parent="1" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#e1d5c3;strokeColor=#9673a6;rounded=0;" value="NormalizeMixin" vertex="1">
+          <mxGeometry height="180" width="250" x="25" y="-40" as="geometry">
+            <mxRectangle height="30" width="120" x="50" y="50" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-52" parent="EY4MimpLL5ln4E1jZa24-51" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="+ normalize_columns(df, convert_case, empty_col_name)&#xa;+ normalize(df, drop_empty_cols, trim_strings)&#xa;- _remove_accents(text)&#xa;- _handle_duplicate_columns(cols)" vertex="1">
+          <mxGeometry height="154" width="250" y="26" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-53" parent="1" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#d4e6f1;strokeColor=#3498db;rounded=0;" value="&lt;&lt;abstract&gt;&gt;&#xa;FileReader" vertex="1">
+          <mxGeometry height="240" width="300" x="400" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-54" parent="EY4MimpLL5ln4E1jZa24-53" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="- output_dir: str&#xa;- verbose: bool&#xa;- exporter: FileExporter" vertex="1">
+          <mxGeometry height="70" width="300" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-55" parent="EY4MimpLL5ln4E1jZa24-53" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=4;spacingRight=4;rotatable=0;deletable=0;editable=0;connectable=0;" value="" vertex="1">
+          <mxGeometry height="8" width="300" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-56" parent="EY4MimpLL5ln4E1jZa24-53" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="+ read(filepath, normalize, normalize_columns): DataFrame&#xa;+ read_multiple_files(folderpath): dict&#xa;+ export(df, method, **kwargs): None&#xa;# _read(filepath, **kwargs): DataFrame [ABSTRACT]&#xa;# _get_file_extensions(): list [ABSTRACT]" vertex="1">
+          <mxGeometry height="122" width="300" y="118" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-57" parent="1" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#d4e6f1;strokeColor=#3498db;rounded=0;" value="&lt;&lt;abstract&gt;&gt;&#xa;FileReaderEncoding" vertex="1">
+          <mxGeometry height="200" width="300" x="400" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-58" parent="EY4MimpLL5ln4E1jZa24-57" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="- encodings: List[str]&#xa;- success_encoding: str" vertex="1">
+          <mxGeometry height="50" width="300" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-59" parent="EY4MimpLL5ln4E1jZa24-57" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=4;spacingRight=4;rotatable=0;deletable=0;editable=0;connectable=0;" value="" vertex="1">
+          <mxGeometry height="8" width="300" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-60" parent="EY4MimpLL5ln4E1jZa24-57" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="+ _read(filepath, **kwargs): DataFrame&#xa;  (Itera encodings → llama _read_with_encoding)&#xa;# _read_with_encoding(filepath, encoding): DataFrame [ABSTRACT]" vertex="1">
+          <mxGeometry height="102" width="300" y="98" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-61" parent="1" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#d5f4e6;strokeColor=#27ae60;rounded=0;" value="DelimitedTextReader" vertex="1">
+          <mxGeometry height="200" width="300" x="400" y="670" as="geometry">
+            <mxRectangle height="30" width="150" x="475" y="690" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-62" parent="EY4MimpLL5ln4E1jZa24-61" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="- delimiters: List[str]&#xa;- success_delimiter: str&#xa;- bad_lines: list&#xa;- capture_bad_lines: bool" vertex="1">
+          <mxGeometry height="80" width="300" y="26" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-63" parent="EY4MimpLL5ln4E1jZa24-61" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=4;spacingRight=4;rotatable=0;deletable=0;editable=0;connectable=0;" value="" vertex="1">
+          <mxGeometry height="8" width="300" y="106" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-64" parent="EY4MimpLL5ln4E1jZa24-61" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="+ _read_with_encoding(filepath, encoding): DataFrame&#xa;  (Itera delimitadores → llama pd.read_csv)&#xa;+ _get_file_extensions(): [&#39;.csv&#39;, &#39;.tsv&#39;, &#39;.txt&#39;]" vertex="1">
+          <mxGeometry height="86" width="300" y="114" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-65" collapsed="1" parent="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#fce5cd;strokeColor=#d79b00;rounded=0;" value="CSVReader" vertex="1">
+          <mxGeometry height="30" width="100" x="100" y="620" as="geometry">
+            <mxRectangle height="100" width="200" x="100" y="620" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-66" parent="EY4MimpLL5ln4E1jZa24-65" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="20" width="200" y="26" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-67" parent="EY4MimpLL5ln4E1jZa24-65" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=4;spacingRight=4;rotatable=0;deletable=0;editable=0;connectable=0;" value="" vertex="1">
+          <mxGeometry height="8" width="200" y="46" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-68" parent="EY4MimpLL5ln4E1jZa24-65" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="+ __init__(...): initializes CSV reader" vertex="1">
+          <mxGeometry height="46" width="200" y="54" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-69" collapsed="1" parent="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#fce5cd;strokeColor=#d79b00;rounded=0;" value="TSVReader" vertex="1">
+          <mxGeometry height="30" width="100" x="100" y="755" as="geometry">
+            <mxRectangle height="100" width="200" x="100" y="800" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-70" parent="EY4MimpLL5ln4E1jZa24-69" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="20" width="200" y="26" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-71" parent="EY4MimpLL5ln4E1jZa24-69" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=4;spacingRight=4;rotatable=0;deletable=0;editable=0;connectable=0;" value="" vertex="1">
+          <mxGeometry height="8" width="200" y="46" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-72" parent="EY4MimpLL5ln4E1jZa24-69" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;" value="+ __init__(...): tab priority delimiter" vertex="1">
+          <mxGeometry height="46" width="200" y="54" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-73" parent="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#fce5cd;strokeColor=#d79b00;rounded=0;" value="ExcelReader" vertex="1">
+          <mxGeometry height="150" width="220" x="840" y="70" as="geometry">
+            <mxRectangle height="30" width="110" x="840" y="155" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-74" parent="EY4MimpLL5ln4E1jZa24-73" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="- engines: Dict[str, List[str]]&#xa;- success_engine: str" vertex="1">
+          <mxGeometry height="50" width="220" y="26" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-75" parent="EY4MimpLL5ln4E1jZa24-73" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=4;spacingRight=4;rotatable=0;deletable=0;editable=0;connectable=0;" value="" vertex="1">
+          <mxGeometry height="8" width="220" y="76" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-76" parent="EY4MimpLL5ln4E1jZa24-73" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=10;" value="+ _read(filepath, sheet_name): DataFrame&#xa;+ read_sheet_names(filepath): List[str]&#xa;+ read_multiple_sheets(filepath): dict" vertex="1">
+          <mxGeometry height="66" width="220" y="84" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-77" parent="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#fce5cd;strokeColor=#d79b00;rounded=0;" value="JSONReader" vertex="1">
+          <mxGeometry height="120" width="220" x="840" y="230" as="geometry">
+            <mxRectangle height="30" width="110" x="840" y="230" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-78" parent="EY4MimpLL5ln4E1jZa24-77" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="20" width="220" y="26" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-79" parent="EY4MimpLL5ln4E1jZa24-77" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=4;spacingRight=4;rotatable=0;deletable=0;editable=0;connectable=0;" value="" vertex="1">
+          <mxGeometry height="8" width="220" y="46" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-80" parent="EY4MimpLL5ln4E1jZa24-77" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=10;" value="+ _read(filepath, orient): DataFrame&#xa;+ read_lines(filepath): DataFrame" vertex="1">
+          <mxGeometry height="66" width="220" y="54" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-81" parent="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#f8cbad;strokeColor=#ea6b66;rounded=0;" value="FileExporter" vertex="1">
+          <mxGeometry height="180" width="250" x="70" y="360" as="geometry">
+            <mxRectangle height="30" width="110" x="110" y="460" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-82" parent="EY4MimpLL5ln4E1jZa24-81" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="- output_dir: Path&#xa;- verbose: bool" vertex="1">
+          <mxGeometry height="50" width="250" y="26" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-83" parent="EY4MimpLL5ln4E1jZa24-81" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=4;spacingRight=4;rotatable=0;deletable=0;editable=0;connectable=0;" value="" vertex="1">
+          <mxGeometry height="8" width="250" y="76" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-84" parent="EY4MimpLL5ln4E1jZa24-81" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=10;" value="+ export(df, method, **kwargs): None&#xa;- _export_csv(df, filename): None&#xa;- _export_excel(df, filename): None&#xa;- _export_excel_parts(df, prefix): None&#xa;- _export_excel_sheets(df, filename): None" vertex="1">
+          <mxGeometry height="96" width="250" y="84" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-85" parent="1" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#fff2cc;strokeColor=#d6b656;rounded=0;" value="ReaderFactory" vertex="1">
+          <mxGeometry height="150" width="280" x="760" y="-150" as="geometry">
+            <mxRectangle height="30" width="120" x="800" y="-70" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-86" parent="EY4MimpLL5ln4E1jZa24-85" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="- READER_MAP: Dict[str, Type[FileReader]]" vertex="1">
+          <mxGeometry height="30" width="280" y="26" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-87" parent="EY4MimpLL5ln4E1jZa24-85" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=4;spacingRight=4;rotatable=0;deletable=0;editable=0;connectable=0;" value="" vertex="1">
+          <mxGeometry height="8" width="280" y="56" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-88" parent="EY4MimpLL5ln4E1jZa24-85" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=10;" value="+ create_reader(filepath): FileReader&#xa;+ get_supported_extensions(): List[str]&#xa;+ register_reader(extension, reader_class): None" vertex="1">
+          <mxGeometry height="86" width="280" y="64" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-89" edge="1" parent="1" source="EY4MimpLL5ln4E1jZa24-53" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=0;dashed=1;" target="EY4MimpLL5ln4E1jZa24-51">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-90" edge="1" parent="1" source="EY4MimpLL5ln4E1jZa24-57" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=0;dashed=0;" target="EY4MimpLL5ln4E1jZa24-53">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-91" edge="1" parent="1" source="EY4MimpLL5ln4E1jZa24-61" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=0;dashed=0;" target="EY4MimpLL5ln4E1jZa24-57">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-92" edge="1" parent="1" source="EY4MimpLL5ln4E1jZa24-65" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=0;dashed=0;" target="EY4MimpLL5ln4E1jZa24-61">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-93" edge="1" parent="1" source="EY4MimpLL5ln4E1jZa24-69" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=0;dashed=0;" target="EY4MimpLL5ln4E1jZa24-61">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-94" edge="1" parent="1" source="EY4MimpLL5ln4E1jZa24-73" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=0;dashed=0;" target="EY4MimpLL5ln4E1jZa24-53">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-95" edge="1" parent="1" source="EY4MimpLL5ln4E1jZa24-77" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=0;dashed=0;" target="EY4MimpLL5ln4E1jZa24-53">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="770" y="290" />
+              <mxPoint x="770" y="170" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-96" edge="1" parent="1" source="EY4MimpLL5ln4E1jZa24-53" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=open;endFill=0;dashed=0;startArrow=diamond;startFill=0;" target="EY4MimpLL5ln4E1jZa24-81">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-97" edge="1" parent="1" source="EY4MimpLL5ln4E1jZa24-85" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=open;endFill=0;dashed=1;" target="EY4MimpLL5ln4E1jZa24-53">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-98" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;fontSize=11;fontStyle=2;" value="Solid Arrow = Herencia" vertex="1">
+          <mxGeometry height="30" width="200" x="130" y="900" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-99" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;fontSize=11;fontStyle=2;" value="Dashed Arrow = Implementa Interface" vertex="1">
+          <mxGeometry height="30" width="250" x="380" y="900" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-100" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;fontSize=11;fontStyle=2;" value="Diamond = Composición" vertex="1">
+          <mxGeometry height="30" width="200" x="650" y="900" as="geometry" />
+        </mxCell>
+        <mxCell id="EY4MimpLL5ln4E1jZa24-101" parent="1" style="text;whiteSpace=wrap;" value="+ = public&#xa;# = protected&#xa;- = private&#xa;[ABSTRACT] = Método abstracto&#xa;→ = Herencia (extends)&#xa;◇ = Composición (has-a)&#xa;⟶ = Asociación/Uso" vertex="1">
+          <mxGeometry height="130" width="210" x="770" y="740" as="geometry" />
+        </mxCell>
+        <mxCell id="hpmZ9y6UZTt-FDTTydzF-1" parent="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#fce5cd;strokeColor=#d79b00;rounded=0;" value="HTMLReader" vertex="1">
+          <mxGeometry height="120" width="220" x="842" y="378" as="geometry">
+            <mxRectangle height="30" width="110" x="840" y="230" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="hpmZ9y6UZTt-FDTTydzF-2" parent="hpmZ9y6UZTt-FDTTydzF-1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="20" width="220" y="26" as="geometry" />
+        </mxCell>
+        <mxCell id="hpmZ9y6UZTt-FDTTydzF-3" parent="hpmZ9y6UZTt-FDTTydzF-1" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=4;spacingRight=4;rotatable=0;deletable=0;editable=0;connectable=0;" value="" vertex="1">
+          <mxGeometry height="8" width="220" y="46" as="geometry" />
+        </mxCell>
+        <mxCell id="hpmZ9y6UZTt-FDTTydzF-4" parent="hpmZ9y6UZTt-FDTTydzF-1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=10;" value="+ _read(filepath, orient): DataFrame+ read_all_tables(filepath): dict" vertex="1">
+          <mxGeometry height="66" width="220" y="54" as="geometry" />
+        </mxCell>
+        <mxCell id="hpmZ9y6UZTt-FDTTydzF-8" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="770" y="440" as="sourcePoint" />
+            <mxPoint x="770" y="290" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="hpmZ9y6UZTt-FDTTydzF-9" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;entryX=0.008;entryY=0.119;entryDx=0;entryDy=0;entryPerimeter=0;" target="hpmZ9y6UZTt-FDTTydzF-4" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="770" y="440" as="sourcePoint" />
+            <mxPoint x="730" y="390" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -227,3 +227,7 @@ exports/
 #Miscelaneous
 ejemplo_oracle.py
 HTMLREADER_SUMMARY.md
+*.egg-info
+build/
+dist/
+COMPLETE GUIDE – PACKAGE CREATION & BUILD.txt

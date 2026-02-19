@@ -6,6 +6,7 @@ A comprehensive Python toolkit for exploratory data analysis (EDA) with advanced
 
 - [Features](#features)
 - [Installation](#installation)
+- [Development & Building](#development--building)
 - [Quick Start](#quick-start)
 - [Core Components](#core-components)
 - [Usage Examples](#usage-examples)
@@ -37,17 +38,112 @@ A comprehensive Python toolkit for exploratory data analysis (EDA) with advanced
 
 ## Installation
 
+### From Source
+
 ```bash
 # Clone the repository
 git clone https://github.com/yourusername/EDA-toolkit.git
 cd EDA-toolkit
 
-# Install dependencies
-pip install pandas openpyxl
+# Install the package
+pip install .
+```
 
-# Install in development mode
+### For Development
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/EDA-toolkit.git
+cd EDA-toolkit
+
+# Create a virtual environment
+python -m venv .venv
+
+# Activate the environment
+# On Windows:
+.venv\Scripts\activate
+# On Linux/Mac:
+source .venv/bin/activate
+
+# Upgrade pip and build tools
+python -m pip install --upgrade pip setuptools wheel
+
+# Install in editable mode for development
 pip install -e .
 ```
+
+## Development & Building
+
+### Package Structure
+
+The project uses `pyproject.toml` for modern Python packaging:
+
+```
+EDA-toolkit/
+├── pandas_toolkit/          # Main package directory
+│   ├── __init__.py
+│   ├── io/                  # I/O modules
+│   │   ├── __init__.py
+│   │   ├── readers/
+│   │   ├── base/
+│   │   └── ...
+├── docs/                    # Documentation
+├── tests/                   # Test files
+├── pyproject.toml          # Package configuration
+└── README.md
+```
+
+### Building the Package
+
+To create distributable builds:
+
+```bash
+# 1. Install the build tool
+pip install build
+
+# 2. Generate distribution packages
+python -m build
+
+# This creates:
+# dist/
+#   pandas_toolkit-0.1.0.tar.gz         # Source distribution
+#   pandas_toolkit-0.1.0-py3-none-any.whl  # Wheel distribution
+```
+
+### Testing the Build
+
+To test the package in a clean environment:
+
+```bash
+# Create a test environment
+python -m venv test_env
+
+# Activate it
+# Windows:
+test_env\Scripts\activate
+# Linux/Mac:
+source test_env/bin/activate
+
+# Install from the wheel
+pip install dist/pandas_toolkit-0.1.0-py3-none-any.whl
+
+# Test the import
+python -c "import pandas_toolkit; print('Installation successful!')"
+```
+
+### pyproject.toml Configuration
+
+The package uses modern Python packaging standards with the following key dependencies:
+
+- **pandas** >= 2.2, < 3.0
+- **numpy** >= 2.0, < 3.0
+- **openpyxl** >= 3.1, < 4.0 (for Excel support)
+- **pyarrow** >= 21.0.0 (for Parquet support)
+- **lxml** >= 5.0.0 (for HTML/XML parsing)
+- **html5lib** >= 1.1 (for HTML parsing)
+- **python-dateutil** >= 2.9.0
+
+Requires Python >= 3.9
 
 ## Quick Start
 

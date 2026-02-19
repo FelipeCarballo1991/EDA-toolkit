@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pandas-toolkit"
+version = "0.1.0"
+description = "Reusable pandas processing toolkit"
+authors = [
+    { name = "Felipe Carballo" }
+]
+readme = "README.md"
+requires-python = ">=3.9"
+
+dependencies = [
+    "pandas>=2.2,<3.0",
+    "numpy>=2.0,<3.0",
+    "openpyxl>=3.1,<4.0",
+    "pyarrow>=21.0.0",
+    "python-dateutil>=2.9.0",
+    "lxml>=5.0.0",
+    "html5lib>=1.1"
+]
+
+[tool.setuptools.packages.find]
+where = ["."]

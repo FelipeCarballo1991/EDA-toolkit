@@ -153,7 +153,7 @@ class FileExporter:
         self, 
         df: pd.DataFrame, 
         filename_prefix: str,
-        max_rows: int = 10000,
+        max_rows: int = 1000000,
         **kwargs
     ) -> None:
         """
@@ -168,7 +168,7 @@ class FileExporter:
             DataFrame to export.
         filename_prefix : str
             Prefix for output files (e.g., "report" creates "report_part1.xlsx").
-        max_rows : int, default 10000
+        max_rows : int, default 1000000
             Maximum number of rows per Excel file.
         **kwargs : dict
             Additional arguments passed to pandas.to_excel().
@@ -226,7 +226,7 @@ class FileExporter:
         self, 
         df: pd.DataFrame, 
         filename: str,
-        max_rows: int = 10000,
+        max_rows: int = 1000000,
         **kwargs
     ) -> None:
         """
@@ -242,7 +242,7 @@ class FileExporter:
             DataFrame to export.
         filename : str
             Name of the output Excel file (.xlsx).
-        max_rows : int, default 10000
+        max_rows : int, default 1000000
             Maximum number of rows per sheet.
         **kwargs : dict
             Additional arguments passed to pandas.ExcelWriter().

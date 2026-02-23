@@ -271,6 +271,114 @@ class TestHTMLReader:
         
         captured = capsys.readouterr()
         assert "[DEBUG]" in captured.out or "[INFO]" in captured.out
+    
+    def test_read_all_returns_list(self, sample_html_single_table):
+        """
+        Test that HTMLReader.read_all() returns a list of DataFrames.
+        
+        Verifies the unified interface where read_all() returns a list
+        even for single-table HTML files.
+        """
+        reader = HTMLReader()
+        
+        tables = reader.read_all(sample_html_single_table)
+        
+        # Should return a list
+        assert isinstance(tables, list)
+        
+        # Should contain exactly one DataFrame (single table HTML)
+        assert len(tables) == 1
+        
+        # First element should be a DataFrame
+        assert isinstance(tables[0], pd.DataFrame)
+        
+        # Verify content
+        df = tables[0]
+        assert 'Name' in df.columns
+        assert 'Age' in df.columns
+    
+    def test_read_all_multiple_tables(self, sample_html_multiple_tables):
+        """
+        Test read_all() with HTML containing multiple tables.
+        
+        Verifies that all tables are returned in order.
+        """
+        reader = HTMLReader()
+        
+        tables = reader.read_all(sample_html_multiple_tables)
+        
+        # Should return list with 3 DataFrames
+        assert isinstance(tables, list)
+        assert len(tables) == 3
+        
+        # All should be DataFrames
+        assert all(isinstance(df, pd.DataFrame) for df in tables)
+        
+        # Verify each table
+        assert 'Name' in tables[0].columns
+        assert 'Product' in tables[1].columns
+        assert 'Date' in tables[2].columns
+    
+    def test_read_all_with_normalization(self, sample_html_multiple_tables):
+        """
+        Test read_all() with normalization parameters.
+        
+        Verifies that normalization is applied to all tables.
+        """
+        reader = HTMLReader()
+        
+        tables = reader.read_all(
+            sample_html_multiple_tables,
+            normalize=True,
+            normalize_columns=True
+        )
+        
+        assert len(tables) == 3
+        
+        # Check that normalization was applied
+        for table in tables:
+            # Should have normalized value columns (_norm suffix)
+            norm_cols = [col for col in table.columns if col.endswith('_norm')]
+            assert len(norm_cols) > 0, "No normalized columns found"
+    
+    def test_read_all_consistent_with_read_all_tables(self, sample_html_multiple_tables):
+        """
+        Test that read_all() produces same results as read_all_tables().
+        
+        Verifies backward compatibility between new unified interface
+        and legacy method.
+        """
+        reader = HTMLReader()
+        
+        # Use new method
+        tables_new = reader.read_all(sample_html_multiple_tables)
+        
+        # Use legacy method
+        tables_old = reader.read_all_tables(sample_html_multiple_tables)
+        
+        # Should return same results
+        assert len(tables_new) == len(tables_old)
+        
+        for i in range(len(tables_new)):
+            pd.testing.assert_frame_equal(tables_new[i], tables_old[i])
+    
+    def test_read_all_empty_html_raises_error(self, tmp_path):
+        """
+        Test that read_all() raises error for HTML without tables.
+        
+        Verifies proper error handling when no tables found.
+        """
+        # Create HTML file with no tables
+        html_file = tmp_path / "no_tables.html"
+        html_file.write_text(
+            "<html><body><p>No tables here</p></body></html>",
+            encoding="utf-8"
+        )
+        
+        reader = HTMLReader()
+        
+        with pytest.raises(ValueError, match="No tables found|Could not read any tables"):
+            reader.read_all(str(html_file))
 
 
 if __name__ == "__main__":

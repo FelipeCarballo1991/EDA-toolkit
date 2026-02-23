@@ -135,6 +135,86 @@ class FileReader(ABC, NormalizeMixin):
         
         return df
 
+    def read_all(
+        self,
+        filepath: str,
+        normalize: bool = False,
+        normalize_columns: bool = False,
+        skip_leading_empty_rows: bool = True,
+        skip_trailing_empty_rows: bool = True,
+        **kwargs
+    ) -> list:
+        """
+        Read all available data from file, returning a list of DataFrames.
+        
+        This method provides a unified interface across all readers:
+        - CSV/TSV/Delimited: Returns [df] (single DataFrame wrapped in list)
+        - Excel: Returns list of DataFrames (one per sheet)
+        - HTML: Returns list of DataFrames (one per table)
+        - JSON/Parquet: Returns [df] (single DataFrame wrapped in list)
+        
+        This allows consistent handling of both single and multi-table formats:
+        ```python
+        tables = reader.read_all(filepath)
+        for table in tables:
+            process(table)
+        ```
+        
+        Parameters
+        ----------
+        filepath : str
+            Path to the file to read.
+        normalize : bool, default False
+            Normalize cell values (create "_norm" columns).
+        normalize_columns : bool, default False
+            Normalize column names.
+        skip_leading_empty_rows : bool, default True
+            Skip rows at the beginning that are completely empty.
+        skip_trailing_empty_rows : bool, default True
+            Skip rows at the end that are completely empty.
+        **kwargs : dict
+            Additional arguments passed to underlying read methods.
+        
+        Returns
+        -------
+        list[pd.DataFrame]
+            List of DataFrames. Always returns a list, even for single-table formats.
+        
+        Examples
+        --------
+        >>> # CSV reader - single table
+        >>> reader = CSVReader()
+        >>> tables = reader.read_all("data.csv")
+        >>> len(tables)  # 1
+        >>> df = tables[0]
+        >>> 
+        >>> # HTML reader - multiple tables
+        >>> reader = HTMLReader()
+        >>> tables = reader.read_all("report.html")
+        >>> len(tables)  # 3
+        >>> df1, df2, df3 = tables
+        >>> 
+        >>> # Unified processing regardless of format
+        >>> for i, table in enumerate(tables):
+        ...     print(f"Table {i}: {table.shape}")
+        ...     exporter.export(table, filename=f"table_{i}.csv")
+        
+        Notes
+        -----
+        Default implementation reads single table and wraps in list.
+        Readers that support multiple tables (Excel, HTML) should override this method.
+        """
+        # Default implementation: read single table and wrap in list
+        df = self.read(
+            filepath=filepath,
+            normalize=normalize,
+            normalize_columns=normalize_columns,
+            skip_leading_empty_rows=skip_leading_empty_rows,
+            skip_trailing_empty_rows=skip_trailing_empty_rows,
+            **kwargs
+        )
+        return [df]
+
     @staticmethod
     def skip_leading_empty_rows(df: pd.DataFrame) -> pd.DataFrame:
         """

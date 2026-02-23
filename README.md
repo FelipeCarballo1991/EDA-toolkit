@@ -48,6 +48,12 @@ pip install git+https://github.com/FelipeCarballo1991/EDA-toolkit.git
 
 # Install a specific version (using tags)
 pip install git+https://github.com/FelipeCarballo1991/EDA-toolkit.git@v0.1.0
+
+# Update to the latest version (if already installed)
+pip install --upgrade git+https://github.com/FelipeCarballo1991/EDA-toolkit.git
+
+# Force reinstall (useful when repository changed but version number didn't)
+pip install --force-reinstall git+https://github.com/FelipeCarballo1991/EDA-toolkit.git
 ```
 
 ### From Source
@@ -248,10 +254,15 @@ df = reader.read("report.xlsx", sheet_name="Sales")
 sheets = reader.read_sheet_names("report.xlsx")
 print(sheets)  # ['Sales', 'Inventory', 'Customers']
 
-# Read multiple sheets
+# Read multiple sheets as dictionary
 data = reader.read_multiple_sheets("report.xlsx")
 for sheet_name, df in data.items():
     print(f"{sheet_name}: {df.shape}")
+
+# Read all sheets as list (unified interface)
+tables = reader.read_all("report.xlsx")
+for i, df in enumerate(tables):
+    print(f"Sheet {i}: {df.shape}")
 ```
 
 #### JSONReader
@@ -289,10 +300,13 @@ df2 = reader.read("oracle_export.html", table_index=2)
 count = reader.get_tables_count("oracle_export.html")
 print(f"Found {count} tables")
 
-# Read all tables as list
-tables = reader.read_all_tables("oracle_export.html")
+# Read all tables as list (unified interface - recommended)
+tables = reader.read_all("oracle_export.html")
 for i, df in enumerate(tables):
     print(f"Table {i}: {df.shape}")
+
+# Backward compatible: read_all_tables() still works
+tables = reader.read_all_tables("oracle_export.html")  # Same as read_all()
 
 # Read specific tables as dictionary
 tables = reader.read_multiple_tables(
@@ -306,7 +320,99 @@ df5 = tables[5]
 
 ## Usage Examples
 
-### Example 1: Reading Messy Data
+### Example 1: Unified Interface with read_all()
+
+All readers now support a unified `read_all()` interface that always returns a list of DataFrames:
+
+```python
+from pandas_toolkit.io import ReaderFactory
+
+factory = ReaderFactory()
+
+# CSV, JSON, Parquet → Returns [df] (single DataFrame in list)
+tables = factory.create_reader("data.csv").read_all("data.csv")
+print(len(tables))  # 1
+df = tables[0]
+
+# Excel → Returns list of DataFrames (one per sheet)
+tables = factory.create_reader("report.xlsx").read_all("report.xlsx")
+print(len(tables))  # Number of sheets
+for i, df in enumerate(tables):
+    print(f"Sheet {i}: {df.shape}")
+
+# HTML → Returns list of DataFrames (one per table)
+tables = factory.create_reader("page.html").read_all("page.html")
+print(len(tables))  # Number of HTML tables
+for i, df in enumerate(tables):
+    print(f"Table {i}: {df.shape}")
+
+# Process all tables consistently regardless of format
+for table in tables:
+    # Do something with each DataFrame
+    print(table.head())
+```
+
+### Example 2: Export Multiple Tables with export_tables()
+
+The new `export_tables()` method intelligently handles single or multiple DataFrames:
+
+```python
+from pandas_toolkit.io import HTMLReader, FileExporter
+
+# Read multiple tables from HTML
+reader = HTMLReader()
+tables = reader.read_all("oracle_export.html")
+print(f"Found {len(tables)} tables")
+
+# Export all tables to a single Excel file with multiple sheets
+exporter = FileExporter(output_dir="exports")
+exporter.export_tables(
+    tables,
+    filename="oracle_export.xlsx"
+)
+# Creates: oracle_export.xlsx with Table1, Table2, Table3, ... sheets
+
+# Single DataFrame also works
+df = reader.read("data.csv")
+exporter.export_tables(df, filename="single_table.xlsx")
+
+# Large DataFrame automatically splits into multiple sheets
+import pandas as pd
+large_df = pd.DataFrame({"col": range(2_000_000)})  # 2M rows
+exporter.export_tables(
+    large_df,
+    filename="large_data.xlsx",
+    max_rows_per_sheet=1000000
+)
+# Creates: large_data.xlsx with Sheet1 (1M rows), Sheet2 (1M rows)
+```
+
+### Example 3: Complete Workflow - HTML to Excel
+
+```python
+from pandas_toolkit.io import ReaderFactory, FileExporter
+
+# Read all tables from HTML file
+factory = ReaderFactory()
+tables = factory.create_reader("oracle_export.html").read_all(
+    "oracle_export.html",
+    normalize=True,
+    normalize_columns=True
+)
+
+print(f"Processing {len(tables)} tables...")
+
+# Export all tables to single Excel file
+exporter = FileExporter(output_dir="exports", verbose=True)
+exporter.export_tables(
+    tables,
+    filename="processed_oracle_export.xlsx"
+)
+
+print("✓ Export completed!")
+```
+
+### Example 4: Reading Messy Data
 
 ```python
 from pandas_toolkit.io import CSVReader
@@ -326,7 +432,7 @@ df = reader.read(
 print(df.columns)
 ```
 
-### Example 2: Batch Processing Files
+### Example 5: Batch Processing Files
 
 ```python
 from pandas_toolkit.io import CSVReader
@@ -347,7 +453,7 @@ for filename, df in files.items():
     print(f"  Columns: {df.columns.tolist()}")
 ```
 
-### Example 3: Data Export
+### Example 6: Data Export (Legacy Methods)
 
 ```python
 from pandas_toolkit.io import CSVReader
@@ -380,7 +486,7 @@ reader.export(
 # Creates: data_part1.xlsx, data_part2.xlsx, etc.
 ```
 
-### Example 4: Column Name Normalization
+### Example 7: Column Name Normalization
 
 ```python
 from pandas_toolkit.io import CSVReader
@@ -407,7 +513,7 @@ print(df_normalized.columns)
 # ['First_Name', 'Last_Name', 'Employee_ID']
 ```
 
-### Example 5: Cell Value Normalization
+### Example 8: Cell Value Normalization
 
 ```python
 from pandas_toolkit.io import CSVReader
@@ -539,6 +645,11 @@ class ReaderFactory:
 class FileReader:
     def read(filepath, normalize=False, normalize_columns=False, **kwargs) -> pd.DataFrame
     
+    def read_all(filepath, normalize=False, normalize_columns=False, **kwargs) -> list[pd.DataFrame]
+    # Unified interface: always returns list of DataFrames
+    # - Single-table formats (CSV, JSON): returns [df]
+    # - Multi-table formats (Excel, HTML): returns [df1, df2, ...]
+    
     def read_multiple_files(folderpath, **kwargs) -> dict
     
     def normalize_columns(df, convert_case="lower", empty_col_name="unnamed") -> pd.DataFrame
@@ -554,12 +665,19 @@ class FileReader:
 ```python
 class FileExporter:
     def export(df, method="excel", **kwargs)
+    # Single DataFrame export
+    # Methods: "csv", "excel", "excel_parts", "excel_sheets"
     
-    # Methods
-    # - "csv": Export to single CSV file
-    # - "excel": Export to single Excel file
-    # - "excel_parts": Export to multiple Excel files
-    # - "excel_sheets": Export to single Excel with multiple sheets
+    def export_tables(tables, filename, method="excel", max_rows_per_sheet=1000000, **kwargs)
+    # Intelligent multi-table export (NEW in v1.1.0)
+    # - Accepts list[pd.DataFrame] or single pd.DataFrame
+    # - Automatically handles: single tables, multiple tables, large tables
+    # - Splits into multiple sheets/files when needed
+    # - Respects Excel limits (1,048,576 rows per sheet)
+    
+    # Export Methods
+    # - "csv": Export to single CSV file (single table only)
+    # - "excel": Export to Excel with intelligent sheet management
 ```
 
 ## Supported File Formats
@@ -602,7 +720,22 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Changelog
 
-### Version 1.0.0 (Current)
+### Version 1.1.0 (Current - February 2026)
+- ✨ **NEW:** Unified `read_all()` interface across all readers
+  - Returns `list[pd.DataFrame]` consistently for all file formats
+  - Single-table formats (CSV, JSON, Parquet) return `[df]`
+  - Multi-table formats (Excel, HTML) return `[df1, df2, ...]`
+- ✨ **NEW:** Intelligent `export_tables()` method in FileExporter
+  - Handles single or multiple DataFrames automatically
+  - Auto-splits large tables into multiple sheets
+  - Respects Excel row limits (1,048,576 rows/sheet)
+  - Smart sheet naming strategies
+- 🔧 **IMPROVED:** Excel row limit increased from 10,000 to 1,000,000 (default)
+- 🔧 **IMPROVED:** HTMLReader.read_all_tables() now aliased to read_all() for consistency
+- ✅ 94 tests passing - no breaking changes
+- 📚 Enhanced documentation with new workflow examples
+
+### Version 1.0.0
 - ✨ Initial release with core file reading capabilities
 - 🔧 Automatic encoding detection with fallback mechanism
 - 🔧 Automatic delimiter detection for delimited files

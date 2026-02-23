@@ -888,3 +888,112 @@ def test_full_workflow_read_normalize_export(tmp_path, tmp_csv_messy_columns):
     # Verify we can read it back
     loaded_df = pd.read_excel(export_path / "final_report.xlsx")
     assert loaded_df.shape[0] == df.shape[0]
+
+
+# =====================================================================
+# Test: Unified read_all() Interface
+# =====================================================================
+
+def test_csvreader_read_all_returns_list(tmp_csv):
+    """
+    Test that CSVReader.read_all() returns a list with single DataFrame.
+    
+    Verifies the unified interface where read_all() always returns a list,
+    even for single-table formats like CSV.
+    """
+    reader = CSVReader()
+    
+    tables = reader.read_all(tmp_csv)
+    
+    # Should return a list
+    assert isinstance(tables, list)
+    
+    # Should contain exactly one DataFrame
+    assert len(tables) == 1
+    
+    # First element should be a DataFrame
+    assert isinstance(tables[0], pd.DataFrame)
+    
+    # Should have expected data
+    df = tables[0]
+    assert df.shape == (2, 2)  # tmp_csv has 2 rows, 2 columns
+    assert list(df.columns) == ["col1", "col2"]
+
+
+def test_csvreader_read_all_with_normalization(tmp_csv_messy_columns):
+    """
+    Test read_all() with normalization parameters.
+    
+    Verifies that normalization options are properly passed through
+    read_all() to the underlying read() method.
+    """
+    reader = CSVReader()
+    
+    tables = reader.read_all(
+        tmp_csv_messy_columns,
+        normalize=True,
+        normalize_columns=True
+    )
+    
+    assert len(tables) == 1
+    df = tables[0]
+    
+    # Should have normalized columns
+    assert "first_name" in df.columns
+    assert "last_name" in df.columns
+    
+    # Should have normalized value columns
+    assert "first_name_norm" in df.columns
+    assert "last_name_norm" in df.columns
+
+
+def test_csvreader_read_all_consistent_with_read(tmp_csv):
+    """
+    Test that read_all()[0] produces same result as read().
+    
+    Verifies backward compatibility and consistency between the
+    traditional read() method and the new read_all() interface.
+    """
+    reader = CSVReader()
+    
+    # Read with traditional method
+    df_read = reader.read(tmp_csv)
+    
+    # Read with unified interface
+    tables = reader.read_all(tmp_csv)
+    df_read_all = tables[0]
+    
+    # Should produce identical results
+    pd.testing.assert_frame_equal(df_read, df_read_all)
+
+
+def test_csvreader_read_all_with_skip_empty_rows(tmp_path):
+    """
+    Test read_all() with skip_leading_empty_rows and skip_trailing_empty_rows.
+    
+    Verifies that empty row handling works correctly through read_all().
+    """
+    # Create CSV with empty rows at start and end
+    csv_file = tmp_path / "empty_rows.csv"
+    csv_file.write_text(
+        "\n\n"  # Empty rows at start
+        "col1,col2\n"
+        "1,a\n"
+        "2,b\n"
+        "\n\n",  # Empty rows at end
+        encoding="utf-8"
+    )
+    
+    reader = CSVReader()
+    
+    tables = reader.read_all(
+        str(csv_file),
+        skip_leading_empty_rows=True,
+        skip_trailing_empty_rows=True
+    )
+    
+    df = tables[0]
+    
+    # Should have only 2 data rows (empty rows removed)
+    assert len(df) == 2
+    assert list(df.columns) == ["col1", "col2"]

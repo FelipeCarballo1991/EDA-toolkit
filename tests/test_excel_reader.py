@@ -535,3 +535,148 @@ def test_excel_full_workflow(tmp_path, tmp_excel_multiple_sheets):
     
     assert (export_path / "consolidated.xlsx").exists()
     assert len(sheets) == 3
+
+
+# =====================================================================
+# Test: Unified read_all() Interface
+# =====================================================================
+
+def test_excel_reader_read_all_returns_list(tmp_excel_simple):
+    """
+    Test that ExcelReader.read_all() returns a list of DataFrames.
+    
+    Verifies the unified interface where read_all() returns a list
+    with one DataFrame per sheet.
+    """
+    reader = ExcelReader()
+    
+    tables = reader.read_all(tmp_excel_simple)
+    
+    # Should return a list
+    assert isinstance(tables, list)
+    
+    # Should contain at least one DataFrame
+    assert len(tables) >= 1
+    
+    # All elements should be DataFrames
+    for table in tables:
+        assert isinstance(table, pd.DataFrame)
+
+
+def test_excel_reader_read_all_multiple_sheets(tmp_excel_multiple_sheets):
+    """
+    Test read_all() with Excel file containing multiple sheets.
+    
+    Verifies that all sheets are returned in order.
+    """
+    reader = ExcelReader()
+    
+    tables = reader.read_all(tmp_excel_multiple_sheets)
+    
+    # Should return list with 3 DataFrames (one per sheet)
+    assert isinstance(tables, list)
+    assert len(tables) == 3
+    
+    # Verify sheet contents (all sheets have 2 rows, 2 columns)
+    assert tables[0].shape == (2, 2)  # Sales: 2 rows, 2 cols
+    assert tables[1].shape == (2, 2)  # Inventory: 2 rows, 2 cols
+    assert tables[2].shape == (2, 2)  # Customers: 2 rows, 2 cols
+
+
+def test_excel_reader_read_all_with_normalization(tmp_excel_multiple_sheets):
+    """
+    Test read_all() with normalization parameters.
+    
+    Verifies that normalization is applied to all sheets.
+    """
+    reader = ExcelReader()
+    
+    tables = reader.read_all(
+        tmp_excel_multiple_sheets,
+        normalize=True,
+        normalize_columns=True
+    )
+    
+    assert len(tables) == 3
+    
+    # Check that normalization was applied to all tables
+    for table in tables:
+        # Should have lowercase column names (normalized)
+        for col in table.columns:
+            if not col.endswith('_norm'):
+                assert col.islower() or '_' in col
+
+
+def test_excel_reader_read_all_consistent_with_read_multiple_sheets(tmp_excel_multiple_sheets):
+    """
+    Test that read_all() returns data consistent with read_multiple_sheets().
+    
+    Verifies compatibility between different reading methods.
+    """
+    reader = ExcelReader()
+    
+    # Read with read_multiple_sheets (returns dict)
+    sheets_dict = reader.read_multiple_sheets(tmp_excel_multiple_sheets)
+    
+    # Read with read_all (returns list)
+    tables_list = reader.read_all(tmp_excel_multiple_sheets)
+    
+    # Should have same number of tables
+    assert len(sheets_dict) == len(tables_list)
+    
+    # Content should match (order matters for list)
+    for i, (sheet_name, df_dict) in enumerate(sheets_dict.items()):
+        pd.testing.assert_frame_equal(df_dict, tables_list[i])
+
+
+def test_excel_reader_read_all_single_sheet_file(tmp_excel_simple):
+    """
+    Test read_all() with single-sheet Excel file.
+    
+    Verifies that single-sheet files return list with one DataFrame.
+    """
+    reader = ExcelReader()
+    
+    tables = reader.read_all(tmp_excel_simple)
+    
+    # Should return list with 1 DataFrame
+    assert isinstance(tables, list)
+    assert len(tables) == 1
+    assert isinstance(tables[0], pd.DataFrame)
+
+
+def test_excel_reader_read_all_with_empty_sheets(tmp_path):
+    """
+    Test read_all() handling of Excel files with empty/problematic sheets.
+    
+    Verifies graceful handling when some sheets cannot be read.
+    """
+    import openpyxl
+    
+    # Create Excel file with mixed content
+    excel_file = tmp_path / "mixed.xlsx"
+    wb = openpyxl.Workbook()
+    
+    # Sheet 1: Valid data
+    ws1 = wb.active
+    ws1.title = "Data"
+    ws1.append(["col1", "col2"])
+    ws1.append([1, 2])
+    
+    # Sheet 2: Empty sheet
+    wb.create_sheet("Empty")
+    
+    # Sheet 3: More data
+    ws3 = wb.create_sheet("MoreData")
+    ws3.append(["colA", "colB"])
+    ws3.append([10, 20])
+    
+    wb.save(excel_file)
+    
+    reader = ExcelReader(verbose=True)
+    tables = reader.read_all(str(excel_file))
+    
+    # Should successfully read sheets (even if empty)
+    assert isinstance(tables, list)
+    # Will include empty sheets as empty DataFrames
+    assert len(tables) >= 2

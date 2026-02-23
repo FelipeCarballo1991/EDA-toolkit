@@ -310,6 +310,101 @@ class ExcelReader(FileReader):
         
         return sheets_dict
 
+    def read_all(
+        self,
+        filepath: str,
+        normalize: bool = False,
+        normalize_columns: bool = False,
+        skip_leading_empty_rows: bool = True,
+        skip_trailing_empty_rows: bool = True,
+        **kwargs
+    ) -> list:
+        """
+        Read all sheets from an Excel file as a list of DataFrames.
+        
+        Provides a unified interface consistent with other readers.
+        Returns a list of DataFrames, one for each sheet in the Excel file.
+        
+        Parameters
+        ----------
+        filepath : str
+            Path to the Excel file.
+        normalize : bool, default False
+            Normalize cell values (create "_norm" columns).
+        normalize_columns : bool, default False
+            Normalize column names.
+        skip_leading_empty_rows : bool, default True
+            Skip rows at the beginning that are completely empty.
+        skip_trailing_empty_rows : bool, default True
+            Skip rows at the end that are completely empty.
+        **kwargs : dict
+            Additional pandas read_excel arguments.
+        
+        Returns
+        -------
+        list[pd.DataFrame]
+            List of DataFrames, one per sheet in order of appearance.
+        
+        Examples
+        --------
+        >>> reader = ExcelReader()
+        >>> tables = reader.read_all("report.xlsx")
+        >>> len(tables)  # Number of sheets
+        >>> 
+        >>> # Process all sheets
+        >>> for i, df in enumerate(tables):
+        ...     print(f"Sheet {i}: {df.shape}")
+        >>> 
+        >>> # Export all sheets
+        >>> exporter.export_tables(tables, filename="output.xlsx")
+        >>> 
+        >>> # Unified interface with other readers
+        >>> tables = factory.create_reader(path).read_all(path)
+        >>> # Works consistently for CSV, Excel, HTML, etc.
+        
+        Notes
+        -----
+        - Returns sheets in the order they appear in the Excel file
+        - Empty or unreadable sheets are skipped with a warning (if verbose=True)
+        - For more control over sheet selection, use read_multiple_sheets()
+        """
+        # Get all sheet names
+        sheet_names = self.read_sheet_names(filepath)
+        
+        if self.verbose:
+            print(f"[INFO] Reading all {len(sheet_names)} sheets from {filepath}")
+        
+        tables = []
+        for sheet_name in sheet_names:
+            try:
+                df = self.read(
+                    filepath,
+                    sheet_name=sheet_name,
+                    normalize=normalize,
+                    normalize_columns=normalize_columns,
+                    skip_leading_empty_rows=skip_leading_empty_rows,
+                    skip_trailing_empty_rows=skip_trailing_empty_rows,
+                    **kwargs
+                )
+                tables.append(df)
+                
+                if self.verbose:
+                    print(
+                        f"[INFO] Loaded sheet '{sheet_name}': "
+                        f"{df.shape[0]} rows, {df.shape[1]} columns"
+                    )
+            
+            except Exception as e:
+                if self.verbose:
+                    print(f"[WARNING] Failed to read sheet '{sheet_name}': {e}")
+                # Continue with next sheet instead of failing
+                continue
+        
+        if not tables:
+            raise ValueError(f"Could not read any sheets from {filepath}")
+        
+        return tables
+
     def _get_file_extensions(self) -> list:
         """Get file extensions for Excel files."""
         return ['.xlsx', '.XLSX', '.xls', '.XLS']

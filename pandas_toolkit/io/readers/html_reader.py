@@ -190,7 +190,7 @@ class HTMLReader(FileReader):
                 print(f"[ERROR] Failed to count tables: {type(e).__name__}: {e}")
             raise
 
-    def read_all_tables(
+    def read_all(
         self, 
         filepath: str,
         normalize: bool = False,
@@ -202,6 +202,7 @@ class HTMLReader(FileReader):
         """
         Read all tables from an HTML file.
         
+        Provides a unified interface consistent with other readers.
         Returns a list of DataFrames, one for each table found in the HTML.
         Similar to how pd.read_html returns multiple tables.
         
@@ -222,19 +223,19 @@ class HTMLReader(FileReader):
         
         Returns
         -------
-        list
+        list[pd.DataFrame]
             List of DataFrames, one for each table in the HTML file.
         
         Examples
         --------
         >>> reader = HTMLReader()
-        >>> tables = reader.read_all_tables("oracle_export.html")
-        >>> df0 = tables[0]  # Primera tabla
-        >>> df1 = tables[1]  # Segunda tabla
-        >>> df2 = tables[2]  # Tercera tabla
+        >>> tables = reader.read_all("oracle_export.html")
+        >>> df0 = tables[0]  # First table
+        >>> df1 = tables[1]  # Second table
+        >>> df2 = tables[2]  # Third table
         >>> 
         >>> # With normalization
-        >>> tables = reader.read_all_tables(
+        >>> tables = reader.read_all(
         ...     "oracle_export.html",
         ...     normalize=True,
         ...     normalize_columns=True
@@ -244,6 +245,10 @@ class HTMLReader(FileReader):
         >>> for i, df in enumerate(tables):
         ...     print(f"Table {i}: {df.shape}")
         ...     reader.export(df, method="csv", filename=f"table_{i}.csv")
+        >>> 
+        >>> # Unified interface with other readers
+        >>> tables = factory.create_reader(path).read_all(path)
+        >>> # Works consistently for CSV, Excel, HTML, etc.
         """
         if not Path(filepath).exists():
             raise FileNotFoundError(f"File not found: {filepath}")
@@ -281,6 +286,67 @@ class HTMLReader(FileReader):
             raise ValueError(f"Could not read any tables from {filepath}")
         
         return tables_list
+
+    def read_all_tables(
+        self, 
+        filepath: str,
+        normalize: bool = False,
+        normalize_columns: bool = False,
+        skip_leading_empty_rows: bool = True,
+        skip_trailing_empty_rows: bool = True,
+        **kwargs
+    ) -> list:
+        """
+        Read all tables from an HTML file (compatibility alias).
+        
+        .. deprecated:: Use read_all() instead for consistency with other readers.
+        
+        This method is maintained for backward compatibility.
+        New code should use read_all() which provides a unified interface
+        across all reader types.
+        
+        Parameters
+        ----------
+        filepath : str
+            Path to the HTML file.
+        normalize : bool, default False
+            Normalize cell values (create "_norm" columns).
+        normalize_columns : bool, default False
+            Normalize column names.
+        skip_leading_empty_rows : bool, default True
+            Skip rows at the beginning that are completely empty.
+        skip_trailing_empty_rows : bool, default True
+            Skip rows at the end that are completely empty.
+        **kwargs : dict
+            Additional pandas read_html arguments.
+        
+        Returns
+        -------
+        list[pd.DataFrame]
+            List of DataFrames, one for each table in the HTML file.
+        
+        See Also
+        --------
+        read_all : Recommended method with unified interface.
+        
+        Examples
+        --------
+        >>> reader = HTMLReader()
+        >>> # Deprecated: use read_all() instead
+        >>> tables = reader.read_all_tables("oracle_export.html")
+        >>> 
+        >>> # Recommended:
+        >>> tables = reader.read_all("oracle_export.html")
+        """
+        # Simply delegate to read_all()
+        return self.read_all(
+            filepath=filepath,
+            normalize=normalize,
+            normalize_columns=normalize_columns,
+            skip_leading_empty_rows=skip_leading_empty_rows,
+            skip_trailing_empty_rows=skip_trailing_empty_rows,
+            **kwargs
+        )
 
     def read_multiple_tables(
         self, 

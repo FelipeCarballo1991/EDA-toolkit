@@ -48,13 +48,13 @@ exporter = FileExporter(output_dir="exports", verbose=True)
 ```python
 from pandas_toolkit.io.readers import CSVReader
 
-# Todos los readers tienen un exporter integrado
+# All readers have an integrated exporter
 reader = CSVReader(output_dir="exports")
 
-df = reader.read("datos.csv")
+df = reader.read("data.csv")
 
 # Use the reader's exporter
-reader.export(df, method="excel", filename="datos.xlsx")
+reader.export(df, method="excel", filename="data.xlsx")
 ```
 
 ## Export a CSV
@@ -67,7 +67,7 @@ exporter = FileExporter(output_dir="exports")
 exporter.export(
     df,
     method="csv",
-    filename="datos.csv"
+    filename="data.csv"
 )
 ```
 
@@ -108,84 +108,84 @@ Para datasets muy grandes que exceden el límite de filas de Excel (~1M filas):
 ```python
 # Automatically split into multiple files
 exporter.export(
-    df_grande,
+    df_large,
     method="excel_parts",
-    filename_prefix="datos",
-    max_rows=100000  # 100K filas por archivo
+    filename_prefix="data",
+    max_rows=100000  # 100K rows per file
 )
 
-# Crea:
-# - datos_part1.xlsx (filas 0-99,999)
-# - datos_part2.xlsx (filas 100,000-199,999)
-# - datos_part3.xlsx (filas 200,000-299,999)
+# Creates:
+# - data_part1.xlsx (rows 0-99,999)
+# - data_part2.xlsx (rows 100,000-199,999)
+# - data_part3.xlsx (rows 200,000-299,999)
 # etc.
 ```
 
 ### 3. Excel Sheets (Multiple Sheets)
 
-Para datasets grandes que quieres en un solo archivo:
+For large datasets that you want in a single file:
 
 ```python
 # Split into multiple sheets within the same file
 exporter.export(
-    df_grande,
+    df_large,
     method="excel_sheets",
-    filename="datos_completos.xlsx",
-    max_rows=50000  # 50K filas por hoja
+    filename="complete_data.xlsx",
+    max_rows=50000  # 50K rows per sheet
 )
 
-# Crea un archivo con hojas:
-# - Sheet_1 (filas 0-49,999)
-# - Sheet_2 (filas 50,000-99,999)
-# - Sheet_3 (filas 100,000-149,999)
+# Creates a file with sheets:
+# - Sheet_1 (rows 0-49,999)
+# - Sheet_2 (rows 50,000-99,999)
+# - Sheet_3 (rows 100,000-149,999)
 # etc.
 ```
 
-### Comparación Excel Methods
+### Excel Methods Comparison
 
 ```python
 import pandas as pd
 from pandas_toolkit.io.exporter import FileExporter
 
 # Large example DataFrame (300K rows)
-df_grande = pd.DataFrame({
+df_large = pd.DataFrame({
     'id': range(300000),
-    'valor': range(300000)
+    'value': range(300000)
 })
 
 exporter = FileExporter(output_dir="exports", verbose=True)
 
 print("=" * 70)
-print("COMPARACIÓN DE MÉTODOS EXCEL")
+print("EXCEL METHODS COMPARISON")
 print("=" * 70)
 
-# Método 1: Excel simple
-# Para datasets < 1M filas
-exporter.export(df_grande, method="excel", filename="simple.xlsx")
-print("✓ simple.xlsx - Un archivo, una hoja, todas las filas")
+# Method 1: Simple Excel
+# For datasets < 1M rows
+exporter.export(df_large, method="excel", filename="simple.xlsx")
+print("✓ simple.xlsx - One file, one sheet, all rows")
 
-# Método 2: Excel parts
-# Para datasets > 1M filas o cuando necesitas archivos separados
+# Method 2: Excel parts
+# For datasets > 1M rows or when you need separate files
 exporter.export(
-    df_grande,
+    df_large,
     method="excel_parts",
-    filename_prefix="partes",
+    filename_prefix="parts",
     max_rows=100000
 )
-print("✓ partes_part1.xlsx, partes_part2.xlsx, partes_part3.xlsx")
-print("  - Tres archivos separados")
+print("✓ parts_part1.xlsx, parts_part2.xlsx, parts_part3.xlsx")
+print("  - Three separate files")
 
-# Método 3: Excel sheets
-# Para datasets grandes que quieres en un solo archivo
+# Method 3: Excel sheets
+# For large datasets that you want in a single file
 exporter.export(
-    df_grande,
+    df_large,
     method="excel_sheets",
-    filename="hojas.xlsx",
+    filename="sheets.xlsx",
     max_rows=100000
 )
-print("✓ hojas.xlsx - Un archivo con 3 hojas")
+print("✓ sheets.xlsx - One file with 3 sheets")
 
-print("\n✅ Comparación completada!")
+print("\n✅ Comparison completed!")
 ```
 
 ## Export a Parquet
@@ -199,36 +199,36 @@ exporter = FileExporter(output_dir="exports")
 exporter.export(
     df,
     method="parquet",
-    filename="datos.parquet"
+    filename="data.parquet"
 )
 
-# Con compresión
+# With compression
 exporter.export(
     df,
     method="parquet",
-    filename="datos.parquet",
+    filename="data.parquet",
     compression='snappy'  # Opciones: 'snappy', 'gzip', 'brotli'
 )
 ```
 
 ### Ventajas de Parquet
 
-- ✅ Compresión eficiente (archivos más pequeños)
+- ✅ Efficient compression (smaller files)
 - ✅ Lectura más rápida que CSV
 - ✅ Preserva tipos de datos
 - ✅ Permite lectura parcial (columnar)
 
 ```python
-# Comparación de tamaños
+# Size comparison
 exporter = FileExporter(output_dir="exports")
 
 # CSV
-exporter.export(df_grande, method="csv", filename="datos.csv")
-# Tamaño: ~15 MB
+exporter.export(df_large, method="csv", filename="data.csv")
+# Size: ~15 MB
 
 # Parquet
-exporter.export(df_grande, method="parquet", filename="datos.parquet")
-# Tamaño: ~3 MB (5x más pequeño!)
+exporter.export(df_large, method="parquet", filename="data.parquet")
+# Size: ~3 MB (5x smaller!)
 ```
 
 ## Export a JSON
@@ -238,7 +238,7 @@ exporter = FileExporter(output_dir="exports")
 
 # JSON records (lista de objetos)
 df.to_json(
-    "exports/datos_records.json",
+    "exports/data_records.json",
     orient="records",
     indent=2,
     force_ascii=False
@@ -246,7 +246,7 @@ df.to_json(
 
 # JSONL (JSON Lines)
 df.to_json(
-    "exports/datos.jsonl",
+    "exports/data.jsonl",
     orient="records",
     lines=True,
     force_ascii=False
@@ -261,53 +261,53 @@ from pandas_toolkit.io.exporter import FileExporter
 import pandas as pd
 
 print("=" * 70)
-print("PIPELINE COMPLETO DE EXPORT")
+print("COMPLETE EXPORT PIPELINE")
 print("=" * 70)
 
-# 1. Leer datos
-print("\n1️⃣ Leyendo datos...")
+# 1. Read data
+print("\n1️⃣ Reading data...")
 reader = CSVReader(verbose=True, output_dir="exports")
-df = reader.read("datos_originales.csv", normalize=True, normalize_columns=True)
-print(f"   ✓ Cargados: {df.shape[0]} filas × {df.shape[1]} columnas")
+df = reader.read("original_data.csv", normalize=True, normalize_columns=True)
+print(f"   ✓ Loaded: {df.shape[0]} rows × {df.shape[1]} columns")
 
 # 2. Process (example)
-print("\n2️⃣ Procesando datos...")
-df_procesado = df[df['valor'] > 100].copy()
-df_procesado['fecha_proceso'] = pd.Timestamp.now()
-print(f"   ✓ Filtrados: {df_procesado.shape[0]} filas")
+print("\n2️⃣ Processing data...")
+df_processed = df[df['value'] > 100].copy()
+df_processed['process_date'] = pd.Timestamp.now()
+print(f"   ✓ Filtered: {df_processed.shape[0]} rows")
 
 # 3. Export to multiple formats
 print("\n3️⃣ Exporting to multiple formats...")
 
 exporter = FileExporter(output_dir="exports", verbose=True)
 
-# CSV (para compatibilidad)
-exporter.export(df_procesado, method="csv", filename="datos_procesados.csv")
-print("   ✓ CSV exportado")
+# CSV (for compatibility)
+exporter.export(df_processed, method="csv", filename="processed_data.csv")
+print("   ✓ CSV exported")
 
-# Excel (para reportes)
-exporter.export(df_procesado, method="excel", filename="reporte.xlsx")
-print("   ✓ Excel exportado")
+# Excel (for reports)
+exporter.export(df_processed, method="excel", filename="report.xlsx")
+print("   ✓ Excel exported")
 
-# Parquet (para almacenamiento eficiente)
-exporter.export(df_procesado, method="parquet", filename="datos.parquet")
-print("   ✓ Parquet exportado")
+# Parquet (for efficient storage)
+exporter.export(df_processed, method="parquet", filename="data.parquet")
+print("   ✓ Parquet exported")
 
-# JSON (para APIs)
-df_procesado.to_json(
-    "exports/datos.json",
+# JSON (for APIs)
+df_processed.to_json(
+    "exports/data.json",
     orient="records",
     indent=2,
     force_ascii=False
 )
-print("   ✓ JSON exportado")
+print("   ✓ JSON exported")
 
-print("\n✅ Pipeline completado! Archivos en: exports/")
+print("\n✅ Pipeline completed! Files in: exports/")
 ```
 
 ## Export with Readers
 
-Todos los readers tienen el método `export()`:
+All readers have the `export()` method:
 
 ```python
 from pandas_toolkit.io.readers import (
@@ -316,18 +316,18 @@ from pandas_toolkit.io.readers import (
 
 # CSV Reader
 csv_reader = CSVReader(output_dir="exports")
-df = csv_reader.read("datos.csv")
-csv_reader.export(df, method="excel", filename="desde_csv.xlsx")
+df = csv_reader.read("data.csv")
+csv_reader.export(df, method="excel", filename="from_csv.xlsx")
 
 # Excel Reader
 excel_reader = ExcelReader(output_dir="exports")
-df = excel_reader.read("reporte.xlsx", sheet_name="Ventas")
-excel_reader.export(df, method="csv", filename="ventas.csv")
+df = excel_reader.read("report.xlsx", sheet_name="Sales")
+excel_reader.export(df, method="csv", filename="sales.csv")
 
 # JSON Reader
 json_reader = JSONReader(output_dir="exports")
 df = json_reader.read("api_data.json")
-json_reader.export(df, method="excel", filename="desde_json.xlsx")
+json_reader.export(df, method="excel", filename="from_json.xlsx")
 
 # HTML Reader
 html_reader = HTMLReader(output_dir="exports")
@@ -337,38 +337,38 @@ html_reader.export(df, method="csv", filename="tabla_oracle.csv")
 
 ## Handling Large Files
 
-### Estrategia para Diferentes Tamaños
+### Strategy for Different Sizes
 
 ```python
 from pandas_toolkit.io.exporter import FileExporter
 
 exporter = FileExporter(output_dir="exports")
 
-# Pequeño (< 10K filas) - Excel simple
+# Small (< 10K rows) - Simple Excel
 if len(df) < 10000:
-    exporter.export(df, method="excel", filename="datos.xlsx")
+    exporter.export(df, method="excel", filename="data.xlsx")
 
-# Mediano (10K - 1M filas) - Excel simple o CSV
+# Medium (10K - 1M rows) - Simple Excel or CSV
 elif len(df) < 1000000:
-    exporter.export(df, method="excel", filename="datos.xlsx")
-    exporter.export(df, method="csv", filename="datos.csv")
+    exporter.export(df, method="excel", filename="data.xlsx")
+    exporter.export(df, method="csv", filename="data.csv")
 
-# Grande (1M - 10M filas) - Excel parts o Parquet
+# Large (1M - 10M rows) - Excel parts or Parquet
 elif len(df) < 10000000:
     exporter.export(
         df,
         method="excel_parts",
-        filename_prefix="datos",
+        filename_prefix="data",
         max_rows=500000
     )
-    exporter.export(df, method="parquet", filename="datos.parquet")
+    exporter.export(df, method="parquet", filename="data.parquet")
 
-# Muy grande (> 10M filas) - Solo Parquet o CSV
+# Very large (> 10M rows) - Only Parquet or CSV
 else:
-    exporter.export(df, method="parquet", filename="datos.parquet")
-    exporter.export(df, method="csv", filename="datos.csv")
+    exporter.export(df, method="parquet", filename="data.parquet")
+    exporter.export(df, method="csv", filename="data.csv")
 
-print(f"✓ Datos exportados ({len(df):,} filas)")
+print(f"✓ Data exported ({len(df):,} rows)")
 ```
 
 ## Advanced Parameters
@@ -399,10 +399,10 @@ with pd.ExcelWriter(
     'exports/reporte_formateado.xlsx',
     engine='openpyxl'
 ) as writer:
-    df.to_excel(writer, sheet_name='Datos', index=False)
+    df.to_excel(writer, sheet_name='Data', index=False)
     
     # Get worksheet
-    worksheet = writer.sheets['Datos']
+    worksheet = writer.sheets['Data']
     
     # Ajustar ancho de columnas
     for column in worksheet.columns:
@@ -418,7 +418,7 @@ with pd.ExcelWriter(
         worksheet.column_dimensions[column[0].column_letter].width = adjusted_width
 ```
 
-## Tips y Mejores Prácticas
+## Tips and Best Practices
 
 ### 1. Organizar exports por fecha
 
@@ -489,10 +489,10 @@ from pandas_toolkit.io.exporter import FileExporter
 exporter = FileExporter(output_dir="exports")
 
 try:
-    exporter.export(df, method="excel", filename="datos.xlsx")
+    exporter.export(df, method="excel", filename="data.xlsx")
     print("✓ Export exitoso")
 except PermissionError:
-    print("✗ Archivo abierto en Excel, ciérralo primero")
+    print("✗ File open in Excel, close it first")
 except ValueError as e:
     print(f"✗ Error de formato: {e}")
 except Exception as e:

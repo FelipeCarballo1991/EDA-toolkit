@@ -1,40 +1,40 @@
-# Guía Rápida de Uso - Normalización Mejorada
+# Quick Start Guide - Enhanced Normalization
 
 ## 🚀 Quick Start
 
-### Uso Básico (Compatible con código existente)
+### Basic Usage (Compatible with existing code)
 
 ```python
 from pandas_toolkit.io.readers import CSVReader
 
 reader = CSVReader()
 
-# Forma tradicional - sigue funcionando
+# Traditional way - still works
 df = reader.read("data.csv", normalize=True, normalize_columns=True)
 ```
 
-### Usando Presets (Nuevo - Recomendado)
+### Using Presets (New - Recommended)
 
 ```python
-# Preset básico (recomendado para la mayoría de casos)
+# Basic preset (recommended for most cases)
 df = reader.normalize(df, preset='basic')
 
-# Preset completo (limpieza exhaustiva)
+# Complete preset (exhaustive cleaning)
 df = reader.normalize(df, preset='full')
 
-# Preset para análisis (reemplaza columnas originales)
+# Preset for analysis (replaces original columns)
 df = reader.normalize(df, preset='analysis_ready')
 ```
 
-## 📚 Ejemplos Prácticos
+## 📚 Practical Examples
 
-### Ejemplo 1: Limpieza de Datos de Clientes
+### Example 1: Customer Data Cleaning
 
 ```python
 import pandas as pd
 from pandas_toolkit.io.readers import CSVReader
 
-# Datos de ejemplo
+# Sample data
 data = {
     "  Nombre  ": ["  JUAN PÉREZ  ", "  Maria García  ", "  "],
     "Email": ["juan@email.com", "MARIA@EMAIL.COM", "N/A"],
@@ -45,9 +45,9 @@ df = pd.DataFrame(data)
 
 reader = CSVReader()
 
-# Normalización completa
-df_clean = reader.normalize_columns(df)  # Normaliza nombres
-df_clean = reader.normalize(df_clean, preset='basic')  # Normaliza valores
+# Complete normalization
+df_clean = reader.normalize_columns(df)  # Normalize column names
+df_clean = reader.normalize(df_clean, preset='basic')  # Normalize values
 
 print(df_clean)
 #   nombre         email           telefono     status  \
@@ -56,7 +56,7 @@ print(df_clean)
 # 2 -              -               -            activo
 ```
 
-### Ejemplo 2: Preparación para Análisis
+### Example 2: Preparation for Analysis
 
 ```python
 from pandas_toolkit.io.readers import CSVReader
@@ -64,37 +64,37 @@ from pandas_toolkit.io.base import NormalizationConfig
 
 reader = CSVReader()
 
-# Leer y normalizar en un paso
-df = reader.read("ventas.csv", normalize_columns=True)
+# Read and normalize in one step
+df = reader.read("sales.csv", normalize_columns=True)
 
-# Usar preset analysis_ready (reemplaza columnas originales)
+# Use analysis_ready preset (replaces original columns)
 df = reader.normalize(df, preset='analysis_ready')
 
-# Ahora df tiene:
-# - Columnas normalizadas (sin espacios, lowercase, sin acentos)
-# - Valores normalizados (trim, lowercase, nulls estandarizados)
-# - Sin columnas duplicadas (_norm)
-# - Listo para análisis
+# Now df has:
+# - Normalized columns (no spaces, lowercase, no accents)
+# - Normalized values (trim, lowercase, standardized nulls)
+# - No duplicated columns (_norm)
+# - Ready for analysis
 ```
 
-### Ejemplo 3: Normalización Personalizada
+### Example 3: Custom Normalization
 
 ```python
 from pandas_toolkit.io.base import NormalizationConfig
 
-# Configuración personalizada
+# Custom configuration
 config = NormalizationConfig(
     strings={
         'trim': True,
-        'case': 'upper',  # MAYÚSCULAS en lugar de minúsculas
+        'case': 'upper',  # UPPERCASE instead of lowercase
         'remove_special': False
     },
     nulls={
         'standardize': True,
-        'values': ['MISSING', 'UNKNOWN', 'N/D', '']  # Valores null específicos
+        'values': ['MISSING', 'UNKNOWN', 'N/A', '']  # Specific null values
     },
     columns={
-        'drop_original': True,  # Reemplazar columnas
+        'drop_original': True,  # Replace columns
         'suffix': '_clean'
     }
 )
@@ -102,45 +102,45 @@ config = NormalizationConfig(
 df = reader.normalize(df, config=config)
 ```
 
-### Ejemplo 4: Estandarización de Valores Nulos
+### Example 4: Null Values Standardization
 
 ```python
-# Problema: Múltiples representaciones de valores faltantes
+# Problem: Multiple representations of missing values
 data = {
     "Cliente": ["Juan", "N/A", "Maria", "null", "Pedro", "-"],
     "Monto": ["1000", "", "2000", "N/A", "3000", "0"]
 }
 df = pd.DataFrame(data)
 
-# Solución: Estandarizar nulls
+# Solution: Standardize nulls
 df_clean = reader.normalize(
     df,
     standardize_nulls=True,
-    null_values=['MISSING', 'N/D'],  # Valores adicionales
+    null_values=['MISSING', 'N/A'],  # Additional values
     drop_original=True
 )
 
-# Ahora todos los nulls son np.nan
-print(df_clean['Cliente'].isna().sum())  # → 3 valores null
+# Now all nulls are np.nan
+print(df_clean['Cliente'].isna().sum())  # → 3 null values
 ```
 
-### Ejemplo 5: Mantener Columnas Originales vs Reemplazarlas
+### Example 5: Keep Original Columns vs Replace Them
 
 ```python
-# OPCIÓN A: Mantener originales (default)
+# OPTION A: Keep originals (default)
 df_with_both = reader.normalize(df, drop_original=False)
-# Resultado: ['Nombre', 'Email', 'Nombre_norm', 'Email_norm']
+# Result: ['Nombre', 'Email', 'Nombre_norm', 'Email_norm']
 
-# OPCIÓN B: Reemplazar originales
+# OPTION B: Replace originals
 df_replaced = reader.normalize(df, drop_original=True)
-# Resultado: ['Nombre', 'Email'] (pero con valores normalizados)
+# Result: ['Nombre', 'Email'] (but with normalized values)
 
-# OPCIÓN C: Usar sufijo personalizado
+# OPTION C: Use custom suffix
 df_custom = reader.normalize(df, suffix='_clean', drop_original=False)
-# Resultado: ['Nombre', 'Email', 'Nombre_clean', 'Email_clean']
+# Result: ['Nombre', 'Email', 'Nombre_clean', 'Email_clean']
 ```
 
-### Ejemplo 6: Uso Directo de Normalizers (Avanzado)
+### Example 6: Direct Use of Normalizers (Advanced)
 
 ```python
 from pandas_toolkit.io.base.normalizers import (
@@ -149,20 +149,20 @@ from pandas_toolkit.io.base.normalizers import (
     NullNormalizer
 )
 
-# Normalizar solo columnas
+# Normalize only columns
 df = ColumnNormalizer.normalize(df, convert_case="upper")
 
-# Normalizar solo una columna específica
+# Normalize only a specific column
 df['nombre'] = StringNormalizer.normalize(
     df['nombre'],
     trim=True,
-    convert_case="title"  # Primera letra mayúscula
+    convert_case="title"  # First letter uppercase
 )
 
-# Estandarizar nulls
+# Standardize nulls
 df = NullNormalizer.normalize(df, null_values=['MISSING'])
 
-# Obtener resumen de nulls
+# Get null summary
 summary = NullNormalizer.get_null_summary(df)
 print(summary)
 #   column  null_count  null_percentage
@@ -170,24 +170,24 @@ print(summary)
 # 1 email            1        10.0
 ```
 
-### Ejemplo 7: Pipeline Completo de Limpieza
+### Example 7: Complete Cleaning Pipeline
 
 ```python
 from pandas_toolkit.io.readers import CSVReader
 from pandas_toolkit.io.base import NormalizationConfig
 
-# 1. Leer datos
+# 1. Read data
 reader = CSVReader()
-df = reader.read("datos_raw.csv")
+df = reader.read("raw_data.csv")
 
-# 2. Normalizar columnas
+# 2. Normalize columns
 df = reader.normalize_columns(df, convert_case="lower")
 
-# 3. Configurar normalización personalizada
+# 3. Configure custom normalization
 config = NormalizationConfig.from_preset('full')
-config.columns['drop_original'] = True  # Modificar preset
+config.columns['drop_original'] = True  # Modify preset
 
-# 4. Aplicar normalización
+# 4. Apply normalization
 df = reader.normalize(df, config=config)
 
 # 5. Drop empty rows/columns
@@ -198,110 +198,110 @@ df = reader.normalize(
     drop_original=True
 )
 
-# 6. Exportar limpio
-reader.export([df], "datos_clean.xlsx")
+# 6. Export clean data
+reader.export([df], "clean_data.xlsx")
 ```
 
-## 🎨 Comparación de Enfoques
+## 🎨 Approach Comparison
 
-### Enfoque 1: Tradicional (Backward Compatible)
+### Approach 1: Traditional (Backward Compatible)
 ```python
 df = reader.read("data.csv", normalize=True, normalize_columns=True)
-# ✅ Funciona como siempre
-# ⚠️ Menos control sobre opciones
+# ✅ Works as always
+# ⚠️ Less control over options
 ```
 
-### Enfoque 2: Con Preset (Recomendado)
+### Approach 2: With Preset (Recommended)
 ```python
 df = reader.read("data.csv", normalize_columns=True)
 df = reader.normalize(df, preset='basic')
-# ✅ Fácil de usar
-# ✅ Configuración consistente
-# ✅ Casos de uso predefinidos
+# ✅ Easy to use
+# ✅ Consistent configuration
+# ✅ Predefined use cases
 ```
 
-### Enfoque 3: Con Config (Máximo Control)
+### Approach 3: With Config (Maximum Control)
 ```python
 config = NormalizationConfig(...)
 df = reader.normalize(df, config=config)
-# ✅ Control total
-# ✅ Reutilizable
-# ⚠️ Más verboso
+# ✅ Total control
+# ✅ Reusable
+# ⚠️ More verbose
 ```
 
-### Enfoque 4: Directo (Avanzado)
+### Approach 4: Direct (Advanced)
 ```python
 from pandas_toolkit.io.base.normalizers import ColumnNormalizer
 df = ColumnNormalizer.normalize(df)
 # ✅ Granular
-# ✅ Rápido para casos específicos
-# ⚠️ Requiere más conocimiento
+# ✅ Fast for specific cases
+# ⚠️ Requires more knowledge
 ```
 
-## 🔍 Casos de Uso Comunes
+## 🔍 Common Use Cases
 
-### Caso 1: EDA Rápido
+### Case 1: Quick EDA
 ```python
-# Quieres explorar datos rápidamente
+# You want to explore data quickly
 df = reader.normalize(df, preset='basic')
 ```
 
-### Caso 2: Preparar para Machine Learning
+### Case 2: Prepare for Machine Learning
 ```python
-# Necesitas datos limpios para modelar
+# You need clean data for modeling
 df = reader.normalize(df, preset='analysis_ready')
 ```
 
-### Caso 3: Mantener Trazabilidad
+### Case 3: Maintain Traceability
 ```python
-# Quieres comparar antes/después
+# You want to compare before/after
 df = reader.normalize(df, drop_original=False, suffix='_clean')
-# Ahora tienes: valor_original vs valor_original_clean
+# Now you have: original_value vs original_value_clean
 ```
 
-### Caso 4: Limpieza Mínima
+### Case 4: Minimal Cleaning
 ```python
-# Solo quieres quitar espacios
+# You only want to remove spaces
 df = reader.normalize(df, preset='minimal')
 ```
 
 ## 💡 Tips
 
-1. **Usa presets primero**: Prueba `'basic'` o `'full'` antes de customizar
-2. **drop_original=True para análisis**: Ahorra memoria y simplifica
-3. **Mantén originales para auditoría**: Usa `drop_original=False` (default)
-4. **Personaliza presets**: Carga preset y modifica lo que necesites
-5. **Revisa nulls primero**: Usa `NullNormalizer.get_null_summary(df)`
+1. **Use presets first**: Try `'basic'` or `'full'` before customizing
+2. **drop_original=True for analysis**: Saves memory and simplifies
+3. **Keep originals for auditing**: Use `drop_original=False` (default)
+4. **Customize presets**: Load preset and modify what you need
+5. **Check nulls first**: Use `NullNormalizer.get_null_summary(df)`
 
 ## 🐛 Troubleshooting
 
-### Problema: "Los valores no se normalizan"
+### Problem: "Values are not being normalized"
 ```python
-# Asegúrate de que la columna es tipo string
-df['columna'] = df['columna'].astype(str)
+# Make sure the column is string type
+df['column'] = df['column'].astype(str)
 df = reader.normalize(df)
 ```
 
-### Problema: "Perdí mis valores originales"
+### Problem: "I lost my original values"
 ```python
-# Usa drop_original=False (default)
+# Use drop_original=False (default)
 df = reader.normalize(df, drop_original=False)
 ```
 
-### Problema: "Necesito más control"
+### Problem: "I need more control"
 ```python
-# Usa configuración personalizada
+# Use custom configuration
 config = NormalizationConfig(...)
 df = reader.normalize(df, config=config)
 ```
 
-## 📖 Recursos Adicionales
+## 📖 Additional Resources
 
-- [Guía Completa de Normalización](Normalization_Guide.md)
-- [Guía de Migración Fase 1](REFACTORING_PHASE1_GUIDE.md)
-- [Documentación de Normalizers](../pandas_toolkit/io/base/normalizers/README.md)
-- [Resumen Fase 1](PHASE1_SUMMARY.md)
+- [Complete Normalization Guide](Normalization_Guide.md)
+- [Phase 1 Migration Guide](REFACTORING_PHASE1_GUIDE.md)
+- [Normalizers Documentation](../pandas_toolkit/io/base/normalizers/README.md)
+- [Phase 1 Summary](PHASE1_SUMMARY.md)
 
 ---
 
-¡Disfruta de la nueva funcionalidad de normalización! 🎉
+Enjoy the new normalization functionality! 🎉

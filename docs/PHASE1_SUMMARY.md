@@ -1,59 +1,59 @@
-# 🎉 Fase 1 - Refactoring Completado
+# 🎉 Phase 1 - Refactoring Completed
 
-## ✅ Resumen de lo Implementado
+## ✅ Implementation Summary
 
-### 📦 Estructura Nueva
-Se creó una arquitectura modular para el sistema de normalización:
+### 📦 New Structure
+A modular architecture for the normalization system was created:
 
 ```
 pandas_toolkit/io/base/normalizers/
 ├── __init__.py
-├── config.py                # NormalizationConfig con presets
-├── column_normalizer.py     # Normalización de columnas
-├── string_normalizer.py     # Normalización de strings
-├── null_normalizer.py       # Estandarización de nulls
+├── config.py                # NormalizationConfig with presets
+├── column_normalizer.py     # Column normalization
+├── string_normalizer.py     # String normalization
+├── null_normalizer.py       # Null standardization
 └── README.md
 ```
 
-### 🚀 Nuevas Funcionalidades
+### 🚀 New Features
 
-#### 1. Sistema de Configuración con Presets
+#### 1. Preset Configuration System
 ```python
-# 4 presets disponibles
-- minimal: Limpieza básica
-- basic: Recomendado para uso general
-- full: Normalización exhaustiva
-- analysis_ready: Optimizado para análisis (drop_original=True)
+# 4 available presets
+- minimal: Basic cleaning
+- basic: Recommended for general use
+- full: Exhaustive normalization
+- analysis_ready: Optimized for analysis (drop_original=True)
 
-# Uso
+# Usage
 df = reader.normalize(df, preset='basic')
 ```
 
-#### 2. Parámetro `drop_original`
+#### 2. `drop_original` Parameter
 ```python
-# Antes: Siempre duplicaba columnas (_norm)
+# Before: Always duplicated columns (_norm)
 df = reader.normalize(df)  # → ['Name', 'Name_norm']
 
-# Ahora: Opción para reemplazar
+# Now: Option to replace
 df = reader.normalize(df, drop_original=True)  # → ['Name']
 ```
 
-#### 3. Estandarización Mejorada de Nulls
+#### 3. Enhanced Null Standardization
 ```python
-# Convierte múltiples representaciones a np.nan
+# Converts multiple representations to np.nan
 df = reader.normalize(df, standardize_nulls=True)
 # '', 'N/A', 'null', 'None', '-', '--', etc. → np.nan
 
-# Valores null personalizados
+# Custom null values
 df = reader.normalize(df, null_values=['MISSING', 'UNKNOWN'])
 ```
 
-#### 4. Sufijo Personalizable
+#### 4. Customizable Suffix
 ```python
 df = reader.normalize(df, suffix='_clean')  # → ['Name', 'Name_clean']
 ```
 
-#### 5. Configuración con Objetos/Dict
+#### 5. Configuration with Objects/Dict
 ```python
 # Config object
 config = NormalizationConfig(
@@ -67,145 +67,145 @@ config_dict = {'strings': {'case': 'lower'}}
 df = reader.normalize(df, config=config_dict)
 ```
 
-#### 6. Remover Caracteres Especiales en Valores
+#### 6. Remove Special Characters in Values
 ```python
 config = NormalizationConfig(strings={'remove_special': True})
 df = reader.normalize(df, config=config)
 ```
 
 ### 🧪 Tests
-- **53 nuevos tests** específicos para el refactoring
-- **104 tests totales** pasando ✅
-- **0 errores** de linting o compilación
+- **53 new tests** specific to refactoring
+- **104 total tests** passing ✅
+- **0 errors** from linting or compilation
 
-**Archivos de test:**
+**Test files:**
 - `test_normalization_config.py`: 10 tests
 - `test_normalizers.py`: 23 tests  
 - `test_normalize_mixin_refactored.py`: 20 tests
 
-### 📚 Documentación
-Se crearon 3 nuevos documentos:
-1. `REFACTORING_PHASE1_GUIDE.md`: Guía completa de migración
-2. `normalizers/README.md`: Documentación del módulo
-3. Este resumen
+### 📚 Documentation
+3 new documents were created:
+1. `REFACTORING_PHASE1_GUIDE.md`: Complete migration guide
+2. `normalizers/README.md`: Module documentation
+3. This summary
 
-### 🔄 Compatibilidad
+### 🔄 Compatibility
 - ✅ **100% backward compatible**
-- ✅ Todo el código existente sigue funcionando
-- ✅ Sin breaking changes
-- ✅ Métodos legacy soportados
+- ✅ All existing code continues working
+- ✅ No breaking changes
+- ✅ Legacy methods supported
 
-### 📊 Estadísticas
+### 📊 Statistics
 
-**Archivos creados:** 8
-- 4 módulos Python
-- 3 archivos de tests
-- 1 archivo de configuración
+**Files created:** 8
+- 4 Python modules
+- 3 test files
+- 1 configuration file
 
-**Líneas de código:**
-- ~500 líneas en normalizers especializados
-- ~200 líneas en tests nuevos
-- ~300 líneas en configuración
+**Lines of code:**
+- ~500 lines in specialized normalizers
+- ~200 lines in new tests
+- ~300 lines in configuration
 
-**Mejoras de arquitectura:**
-- Separación de responsabilidades ✅
-- Código más testeable ✅
-- Más fácil de extender ✅
-- Mejor organización ✅
+**Architecture improvements:**
+- Separation of concerns ✅
+- More testable code ✅
+- Easier to extend ✅
+- Better organization ✅
 
-## 🎯 Funcionalidades Principales por Normalizer
+## 🎯 Main Features by Normalizer
 
 ### ColumnNormalizer
 ✅ Trim whitespace  
-✅ Conversión de case (lower/upper/None)  
-✅ Remover acentos (Café → Cafe)  
-✅ Remover caracteres especiales  
-✅ Manejar duplicados  
-✅ Manejar columnas vacías  
+✅ Case conversion (lower/upper/None)  
+✅ Remove accents (Café → Cafe)  
+✅ Remove special characters  
+✅ Handle duplicates  
+✅ Handle empty columns  
 
 ### StringNormalizer  
-✅ Trim whitespace en valores  
-✅ Conversión de case  
-✅ Remover caracteres especiales  
-✅ Convertir strings vacíos a None  
-✅ Detectar columnas string  
+✅ Trim whitespace in values  
+✅ Case conversion  
+✅ Remove special characters  
+✅ Convert empty strings to None  
+✅ Detect string columns  
 
 ### NullNormalizer
-✅ Estandarizar múltiples representaciones de null  
-✅ Valores null personalizables  
-✅ Resumen de nulls por columna  
-✅ Normalizar Series individuales  
+✅ Standardize multiple null representations  
+✅ Customizable null values  
+✅ Null summary by column  
+✅ Normalize individual Series  
 
 ### NormalizationConfig
-✅ 4 presets predefinidos  
-✅ Configuración por aspecto (strings, nulls, dates, etc.)  
-✅ Merge de configuraciones  
-✅ Export/import a dict  
-✅ Validación de presets  
+✅ 4 predefined presets  
+✅ Configuration by aspect (strings, nulls, dates, etc.)  
+✅ Merge configurations  
+✅ Export/import to dict  
+✅ Preset validation  
 
-## 📋 Checklist Fase 1
+## 📋 Phase 1 Checklist
 
-- [x] Crear estructura de carpetas para normalizadores
-- [x] Crear NormalizationConfig class
-- [x] Crear ColumnNormalizer specialized class
-- [x] Crear StringNormalizer specialized class
-- [x] Crear NullNormalizer specialized class
-- [x] Refactorizar NormalizeMixin para usar nuevos módulos
-- [x] Mantener compatibilidad hacia atrás
-- [x] Crear tests básicos (53 tests)
-- [x] Actualizar documentación
-- [x] Verificar que no hay errores
-- [x] Ejecutar todos los tests (104 passed ✅)
+- [x] Create folder structure for normalizers
+- [x] Create NormalizationConfig class
+- [x] Create ColumnNormalizer specialized class
+- [x] Create StringNormalizer specialized class
+- [x] Create NullNormalizer specialized class
+- [x] Refactor NormalizeMixin to use new modules
+- [x] Maintain backward compatibility
+- [x] Create basic tests (53 tests)
+- [x] Update documentation
+- [x] Verify no errors
+- [x] Run all tests (104 passed ✅)
 
-## 🚀 Próximos Pasos
+## 🚀 Next Steps
 
-### Fase 2: Normalizaciones Core
-- [ ] Normalización de fechas (DateNormalizer)
-- [ ] Normalización numérica (NumericNormalizer)
-- [ ] Mejoras en manejo de tipos
+### Phase 2: Core Normalizations
+- [ ] Date normalization (DateNormalizer)
+- [ ] Numeric normalization (NumericNormalizer)
+- [ ] Improvements in type handling
 
-### Fase 3: Normalizaciones Avanzadas
-- [ ] Normalización de booleanos (BooleanNormalizer)
-- [ ] Detección automática de tipos (TypeDetector)
-- [ ] Estandarización de categorías (CategoryNormalizer)
+### Phase 3: Advanced Normalizations
+- [ ] Boolean normalization (BooleanNormalizer)
+- [ ] Automatic type detection (TypeDetector)
+- [ ] Category standardization (CategoryNormalizer)
 
-### Fase 4: Sistema de Reportes
-- [ ] Reportes detallados de transformaciones
-- [ ] Logging de cambios
-- [ ] Estadísticas de normalización
+### Phase 4: Report System
+- [ ] Detailed transformation reports
+- [ ] Change logging
+- [ ] Normalization statistics
 
-## 📝 Notas Técnicas
+## 📝 Technical Notes
 
-### Decisiones de Diseño
+### Design Decisions
 
-1. **dataclass para Config**: Facilita la validación y serialización
-2. **Presets como constante de módulo**: Evita problemas con dataclass
-3. **Normalizers como clases con métodos estáticos**: Facilita uso directo
-4. **Delegación en Mixin**: Mantiene compatibilidad y simplifica código
-5. **Tests comprehensivos**: Aseguran calidad y detectan regresiones
+1. **dataclass for Config**: Facilitates validation and serialization
+2. **Presets as module constant**: Avoids problems with dataclass
+3. **Normalizers as classes with static methods**: Facilitates direct use
+4. **Delegation in Mixin**: Maintains compatibility and simplifies code
+5. **Comprehensive tests**: Ensure quality and detect regressions
 
-### Lecciones Aprendidas
+### Lessons Learned
 
-1. Los dataclass no permiten defaults mutables → usar factory o constantes
-2. Mantener backward compatibility requiere planning cuidadoso
-3. Tests son cruciales para validar refactoring sin romper funcionalidad
-4. Documentación clara facilita adopción de nuevas features
+1. Dataclasses don't allow mutable defaults → use factory or constants
+2. Maintaining backward compatibility requires careful planning
+3. Tests are crucial to validate refactoring without breaking functionality
+4. Clear documentation facilitates adoption of new features
 
-## 🎊 Conclusión
+## 🎊 Conclusion
 
-La **Fase 1** se completó exitosamente con:
-- ✅ Arquitectura modular y escalable
-- ✅ Nuevas funcionalidades poderosas
-- ✅ 100% compatibilidad hacia atrás
-- ✅ Tests comprehensivos
-- ✅ Documentación completa
-- ✅ 0 errores
+**Phase 1** was completed successfully with:
+- ✅ Modular and scalable architecture
+- ✅ Powerful new features
+- ✅ 100% backward compatibility
+- ✅ Comprehensive tests
+- ✅ Complete documentation
+- ✅ 0 errors
 
-**El sistema está listo para seguir creciendo con las siguientes fases! 🚀**
+**The system is ready to continue growing with the following phases! 🚀**
 
 ---
 
-**Fecha de Completación:** 2026-02-25  
-**Tests Pasando:** 104/104 ✅  
-**Errores:** 0  
+**Completion Date:** 2026-02-25  
+**Tests Passing:** 104/104 ✅  
+**Errors:** 0  
 **Warnings:** 0  

@@ -233,53 +233,53 @@ df = reader.read(
 from pandas_toolkit.io.readers import CSVReader
 
 # File with multiple problems:
-# - Encoding desconocido
-# - Delimitador desconocido
-# - Líneas mal formateadas
-# - Filas vacías
-# - Nombres de columnas con acentos y espacios
+# - Unknown encoding
+# - Unknown delimiter
+# - Malformed lines
+# - Empty rows
+# - Column names with accents and spaces
 
 print("=" * 70)
-print("PROCESANDO ARCHIVO CSV PROBLEMÁTICO")
+print("PROCESSING PROBLEMATIC CSV FILE")
 print("=" * 70)
 
 reader = CSVReader(
     verbose=True,               # See the entire process
-    capture_bad_lines=True,     # Capturar líneas problemáticas
-    output_dir="exports"        # Carpeta de salida
+    capture_bad_lines=True,     # Capture problematic lines
+    output_dir="exports"        # Output folder
 )
 
 # Read with all corrections
 df = reader.read(
-    "archivo_problematico.csv",
-    normalize=True,                    # Normalizar valores
-    normalize_columns=True,            # Normalizar nombres de columnas
+    "problematic_file.csv",
+    normalize=True,                    # Normalize values
+    normalize_columns=True,            # Normalize column names
     skip_leading_empty_rows=True,
     skip_trailing_empty_rows=True
 )
 
-# Información del proceso
-print(f"\n✓ Archivo leído exitosamente!")
-print(f"  • Encoding detectado: {reader.success_encoding}")
-print(f"  • Delimiter detectado: {repr(reader.success_delimiter)}")
-print(f"  • Shape: {df.shape[0]} filas × {df.shape[1]} columnas")
-print(f"  • Columnas: {df.columns.tolist()}")
+# Process information
+print(f"\n✓ File read successfully!")
+print(f"  • Encoding detected: {reader.success_encoding}")
+print(f"  • Delimiter detected: {repr(reader.success_delimiter)}")
+print(f"  • Shape: {df.shape[0]} rows × {df.shape[1]} columns")
+print(f"  • Columns: {df.columns.tolist()}")
 
-# Si hubo líneas problemáticas
+# If there were problematic lines
 if reader.bad_lines:
-    print(f"\n⚠ Líneas problemáticas: {len(reader.bad_lines)}")
+    print(f"\n⚠ Problematic lines: {len(reader.bad_lines)}")
     for line_num, line_content in reader.bad_lines:
-        print(f"  Línea {line_num}: {line_content[:100]}...")
+        print(f"  Line {line_num}: {line_content[:100]}...")
 
-# Vista previa
-print("\n📋 Vista previa de los datos:")
+# Preview
+print("\n📋 Data preview:")
 print(df.head(3))
 
 # Export clean data
-reader.export(df, method="csv", filename="datos_limpios.csv")
-reader.export(df, method="excel", filename="datos_limpios.xlsx")
+reader.export(df, method="csv", filename="clean_data.csv")
+reader.export(df, method="excel", filename="clean_data.xlsx")
 
-print("\n✅ Datos exportados en: exports/")
+print("\n✅ Data exported to: exports/")
 ```
 
 ## Batch Processing
@@ -292,8 +292,8 @@ from pandas_toolkit.io.readers import CSVReader
 
 reader = CSVReader(verbose=True, output_dir="exports")
 
-# Método 1: Usar read_multiple_files
-print("Método 1: read_multiple_files")
+# Method 1: Use read_multiple_files
+print("Method 1: read_multiple_files")
 files = reader.read_multiple_files(
     "data_folder/",
     normalize=True,
@@ -309,13 +309,13 @@ for filename, df in files.items():
     clean_filename = Path(filename).stem + "_clean.csv"
     reader.export(df, method="csv", filename=clean_filename)
 
-# Método 2: Procesar manualmente
-print("\nMétodo 2: Procesamiento manual")
+# Method 2: Process manually
+print("\nMethod 2: Manual processing")
 data_folder = Path("data_folder")
 csv_files = list(data_folder.glob("*.csv"))
 
 for csv_file in csv_files:
-    print(f"\nProcesando: {csv_file.name}")
+    print(f"\nProcessing: {csv_file.name}")
     
     df = reader.read(
         str(csv_file),

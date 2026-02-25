@@ -52,7 +52,7 @@ print(f"Delimiter: {repr(reader.success_delimiter)}")  # '\t'
 reader = TSVReader(verbose=True)
 
 df = reader.read(
-    "datos.tsv",
+    "data.tsv",
     normalize=True,              # Normalize values
     normalize_columns=True,      # Normalize column names
     skip_leading_empty_rows=True,
@@ -95,8 +95,8 @@ print(f"\n📋 Preview:")
 print(df.head(3))
 
 # Export
-reader.export(df, method="csv", filename="datos_desde_tsv.csv")
-reader.export(df, method="excel", filename="datos_desde_tsv.xlsx")
+reader.export(df, method="csv", filename="data_from_tsv.csv")
+reader.export(df, method="excel", filename="data_from_tsv.xlsx")
 
 print("\n✅ Data exported!")
 ```
@@ -168,7 +168,7 @@ from pandas_toolkit.io.readers import PipeReader
 reader = PipeReader()
 
 # Basic reading
-df = reader.read("datos.pipe")
+df = reader.read("data.pipe")
 
 print(f"Shape: {df.shape}")
 print(f"Detected encoding: {reader.success_encoding}")
@@ -181,7 +181,7 @@ print(f"Delimiter: {repr(reader.success_delimiter)}")  # '|'
 reader = PipeReader(verbose=True)
 
 df = reader.read(
-    "datos.pipe",
+    "data.pipe",
     normalize=True,
     normalize_columns=True,
     skip_leading_empty_rows=True,
@@ -224,8 +224,8 @@ print(f"\n📋 Preview:")
 print(df.head(3))
 
 # Export to more common format
-reader.export(df, method="csv", filename="datos_desde_pipe.csv")
-reader.export(df, method="excel", filename="datos_desde_pipe.xlsx")
+reader.export(df, method="csv", filename="data_from_pipe.csv")
+reader.export(df, method="excel", filename="data_from_pipe.xlsx")
 
 print("\n✅ Data converted and exported!")
 ```
@@ -275,7 +275,7 @@ print(f"Legacy data: {df.shape}")
 ```python
 reader = PipeReader()
 
-# Archivos intermedios de ETL
+# ETL intermediate files
 df = reader.read("etl_staging.pipe")
 
 print(f"Staging records: {len(df)}")
@@ -293,7 +293,7 @@ Both readers share the same methods:
 reader = TSVReader()  # or PipeReader()
 
 df = reader.read(
-    filepath="datos.tsv",
+    filepath="data.tsv",
     normalize=False,
     normalize_columns=False,
     skip_leading_empty_rows=True,
@@ -363,7 +363,7 @@ print(f"   ✓ {df_pipe.shape[0]} records converted")
 # 3. CSV to TSV (save manually)
 print("\n3. CSV → TSV")
 csv_reader = CSVReader(verbose=True, output_dir=output_dir)
-df_csv = csv_reader.read("datos.csv")
+df_csv = csv_reader.read("data.csv")
 df_csv.to_csv(f"{output_dir}/csv_to_tsv.tsv", sep='\t', index=False)
 print(f"   ✓ {df_csv.shape[0]} records converted")
 
@@ -430,13 +430,13 @@ print("\n✅ Batch processing completed!")
 from pandas_toolkit.io.factory import ReaderFactory
 
 # TSV
-tsv_reader = ReaderFactory.create_reader("datos.tsv", verbose=True)
-df_tsv = tsv_reader.read("datos.tsv")
+tsv_reader = ReaderFactory.create_reader("data.tsv", verbose=True)
+df_tsv = tsv_reader.read("data.tsv")
 print(f"Type: {type(tsv_reader).__name__}")  # TSVReader
 
 # Pipe
-pipe_reader = ReaderFactory.create_reader("datos.pipe", verbose=True)
-df_pipe = pipe_reader.read("datos.pipe")
+pipe_reader = ReaderFactory.create_reader("data.pipe", verbose=True)
+df_pipe = pipe_reader.read("data.pipe")
 print(f"Type: {type(pipe_reader).__name__}")  # PipeReader
 ```
 
@@ -461,7 +461,7 @@ if hasattr(reader, 'bad_lines') and reader.bad_lines:
 
 ---
 
-## Comparación: TSV vs Pipe vs CSV
+## Comparison: TSV vs Pipe vs CSV
 
 | Characteristic | TSV | Pipe | CSV |
 |----------------|-----|------|-----|
@@ -478,7 +478,7 @@ if hasattr(reader, 'bad_lines') and reader.bad_lines:
 
 ```python
 # For TSV, verify they are really tabs
-with open("datos.tsv", 'r') as f:
+with open("data.tsv", 'r') as f:
     first_line = f.readline()
     print(repr(first_line))  # You'll see '\t' if they are real tabs
 ```
@@ -499,7 +499,7 @@ reader = TSVReader(verbose=False)
 # Convert TSV/Pipe to CSV for compatibility
 reader = TSVReader(output_dir="exports")
 df = reader.read("datos.tsv")
-reader.export(df, method="csv", filename="datos.csv")
+reader.export(df, method="csv", filename="data.csv")
 ```
 
 ---

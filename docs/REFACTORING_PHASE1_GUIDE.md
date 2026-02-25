@@ -1,97 +1,97 @@
-# Refactoring Fase 1 - Guía de Migración
+# Phase 1 Refactoring - Migration Guide
 
-## 🎉 ¿Qué cambió?
+## 🎉 What Changed?
 
-La **Fase 1** del refactoring de normalización ha sido completada exitosamente. Se ha reorganizado el código para hacerlo más modular, mantenible y extensible, sin romper la compatibilidad con código existente.
+**Phase 1** of the normalization refactoring has been completed successfully. The code has been reorganized to make it more modular, maintainable, and extensible, without breaking compatibility with existing code.
 
-## 📦 Nueva Estructura
+## 📦 New Structure
 
-### Antes (v1.x)
+### Before (v1.x)
 ```
 pandas_toolkit/io/base/
-  ├── mixins.py  (241 líneas - todo en un archivo)
+  ├── mixins.py  (241 lines - everything in one file)
   └── ...
 ```
 
-### Ahora (v2.0)
+### Now (v2.0)
 ```
 pandas_toolkit/io/base/
-  ├── mixins.py  (refactorizado - delega a normalizers)
+  ├── mixins.py  (refactored - delegates to normalizers)
   ├── normalizers/
   │   ├── __init__.py
-  │   ├── config.py              # NormalizationConfig (presets y configuración)
-  │   ├── column_normalizer.py   # Normalización de nombres de columnas
-  │   ├── string_normalizer.py   # Normalización de valores string
-  │   └── null_normalizer.py     # Estandarización de valores nulos
+  │   ├── config.py              # NormalizationConfig (presets and configuration)
+  │   ├── column_normalizer.py   # Column name normalization
+  │   ├── string_normalizer.py   # String value normalization
+  │   └── null_normalizer.py     # Null value standardization
   └── ...
 ```
 
-## ✅ Cambios Implementados
+## ✅ Implemented Changes
 
-### 1. **Separación de Responsabilidades**
-El código de normalización ahora está organizado en módulos especializados:
+### 1. **Separation of Concerns**
+Normalization code is now organized into specialized modules:
 
-- **`ColumnNormalizer`**: Normalización de nombres de columnas
-- **`StringNormalizer`**: Normalización de valores string (trim, case, special chars)
-- **`NullNormalizer`**: Estandarización de valores nulos
+- **`ColumnNormalizer`**: Column name normalization
+- **`StringNormalizer`**: String value normalization (trim, case, special chars)
+- **`NullNormalizer`**: Null value standardization
 
-### 2. **Sistema de Configuración con Presets**
-Nueva clase `NormalizationConfig` con presets predefinidos:
+### 2. **Preset Configuration System**
+New `NormalizationConfig` class with predefined presets:
 
-- **`minimal`**: Solo trim básico
-- **`basic`**: Trim + case + nulls estándar
-- **`full`**: Normalización completa (incluye futuros normalizers)
-- **`analysis_ready`**: Optimizado para análisis (drop_original=True)
+- **`minimal`**: Basic trim only
+- **`basic`**: Trim + case + standard nulls
+- **`full`**: Complete normalization (includes future normalizers)
+- **`analysis_ready`**: Optimized for analysis (drop_original=True)
 
-### 3. **Nuevas Funcionalidades**
+### 3. **New Features**
 
 #### a) `drop_original` Parameter
 ```python
-# Antes: Siempre creaba columnas con sufijo _norm
+# Before: Always created columns with _norm suffix
 df = reader.normalize(df)
-# Columnas: ['Name', 'Name_norm']
+# Columns: ['Name', 'Name_norm']
 
-# Ahora: Opción para reemplazar columnas originales
+# Now: Option to replace original columns
 df = reader.normalize(df, drop_original=True)
-# Columnas: ['Name']  (valores normalizados)
+# Columns: ['Name']  (normalized values)
 ```
 
-#### b) Estandarización Mejorada de Nulls
+#### b) Enhanced Null Standardization
 ```python
-# Convierte múltiples representaciones de null a np.nan
+# Converts multiple null representations to np.nan
 df = reader.normalize(df, standardize_nulls=True)
 # '', 'N/A', 'null', 'None', '-', '--' → np.nan
 
-# Valores null personalizados
+# Custom null values
 df = reader.normalize(df, null_values=['MISSING', 'UNKNOWN'])
 ```
 
-#### c) Sufijo Personalizable
+#### c) Customizable Suffix
 ```python
-# Antes: Siempre usaba '_norm'
+# Before: Always used '_norm'
 df = reader.normalize(df)
-# Columnas: ['Name', 'Name_norm']
+# Columns: ['Name', 'Name_norm']
 
-# Ahora: Sufijo personalizable
+# Now: Customizable suffix
 df = reader.normalize(df, suffix='_clean')
-# Columnas: ['Name', 'Name_clean']
+# Columns: ['Name', 'Name_clean']
 ```
 
-#### d) Presets para Uso Rápido
+#### d) Presets for Quick Use
 ```python
-# Preset básico
+# Basic preset
 df = reader.normalize(df, preset='basic')
 
-# Preset completo
+# Complete preset
 df = reader.normalize(df, preset='full')
 
-# Preset para análisis (reemplaza columnas)
+# Preset for analysis (replaces columns)
 df = reader.normalize(df, preset='analysis_ready')
 ```
 
-#### e) Configuración con Objetos o Diccionarios
+#### e) Configuration with Objects or Dictionaries
 ```python
-# Usando config object
+# Using config object
 config = NormalizationConfig(
     strings={'trim': True, 'case': 'upper'},
     nulls={'standardize': True},
@@ -99,7 +99,7 @@ config = NormalizationConfig(
 )
 df = reader.normalize(df, config=config)
 
-# Usando config dict
+# Using config dict
 config_dict = {
     'strings': {'trim': True, 'case': 'lower'},
     'columns': {'drop_original': False}
@@ -107,9 +107,9 @@ config_dict = {
 df = reader.normalize(df, config=config_dict)
 ```
 
-#### f) Remover caracteres especiales en valores
+#### f) Remove special characters in values
 ```python
-# Nuevo parámetro en config
+# New parameter in config
 config = NormalizationConfig(
     strings={'remove_special': True}
 )
@@ -117,63 +117,63 @@ df = reader.normalize(df, config=config)
 # "user@email.com" → "useremailcom"
 ```
 
-## 🔄 Compatibilidad Hacia Atrás
+## 🔄 Backward Compatibility
 
-### ✅ TODO el código existente sigue funcionando
+### ✅ ALL existing code continues working
 
 ```python
-# Esto sigue funcionando exactamente igual
+# This still works exactly the same
 df = reader.normalize_columns(df)
 df = reader.normalize(df, trim_strings=True, convert_case="lower")
 
-# Métodos legacy también funcionan
+# Legacy methods also work
 reader._remove_accents("Café")  # → "Cafe"
 reader._handle_duplicate_columns(["name", "name"])  # → ['name', 'name_1']
 ```
 
-### 📝 No se requieren cambios en código existente
+### 📝 No changes required in existing code
 
-Tu código actual seguirá funcionando sin modificaciones. Las nuevas funcionalidades son **opt-in**.
+Your current code will continue working without modifications. The new features are **opt-in**.
 
-## 🚀 Guía de Adopción
+## 🚀 Adoption Guide
 
-### Migración Gradual Recomendada
+### Recommended Gradual Migration
 
-#### Paso 1: Familiarízate con los presets
+#### Step 1: Get familiar with presets
 ```python
-# Prueba diferentes presets en tu código
+# Try different presets in your code
 df = reader.normalize(df, preset='basic')
 df = reader.normalize(df, preset='full')
 ```
 
-#### Paso 2: Explora drop_original
+#### Step 2: Explore drop_original
 ```python
-# Si no necesitas las columnas originales
+# If you don't need the original columns
 df = reader.normalize(df, drop_original=True)
 ```
 
-#### Paso 3: Usa configuración personalizada
+#### Step 3: Use custom configuration
 ```python
-# Para casos específicos
+# For specific cases
 config = NormalizationConfig.from_preset('basic')
 config.strings['case'] = 'upper'
 df = reader.normalize(df, config=config)
 ```
 
-## 📊 Ejemplos de Uso
+## 📊 Usage Examples
 
-### Caso 1: Limpieza Básica (Backward Compatible)
+### Case 1: Basic Cleaning (Backward Compatible)
 ```python
 from pandas_toolkit.io.readers import CSVReader
 
 reader = CSVReader()
 df = reader.read("data.csv", normalize=True, normalize_columns=True)
-# Funciona exactamente igual que antes
+# Works exactly like before
 ```
 
-### Caso 2: Normalización para Análisis
+### Case 2: Normalization for Analysis
 ```python
-# Reemplaza columnas originales con versiones normalizadas
+# Replace original columns with normalized versions
 df = reader.read(
     "data.csv",
     normalize=True,
@@ -182,7 +182,7 @@ df = reader.read(
 df = reader.normalize(df, preset='analysis_ready')
 ```
 
-### Caso 3: Normalización Personalizada
+### Case 3: Custom Normalization
 ```python
 config = NormalizationConfig(
     strings={'trim': True, 'case': 'lower', 'remove_special': False},
@@ -193,9 +193,9 @@ config = NormalizationConfig(
 df = reader.normalize(df, config=config)
 ```
 
-### Caso 4: Estandarizar Valores Nulos
+### Case 4: Standardize Null Values
 ```python
-# Valores null personalizados para tu dominio
+# Custom null values for your domain
 df = reader.normalize(
     df,
     standardize_nulls=True,
@@ -206,112 +206,112 @@ df = reader.normalize(
 
 ## 🧪 Tests
 
-Se agregaron **53 nuevos tests** específicos para el refactoring:
+**53 new tests** were added specific to the refactoring:
 
-- `test_normalization_config.py`: 10 tests para configuración
-- `test_normalizers.py`: 23 tests para normalizers especializados
-- `test_normalize_mixin_refactored.py`: 20 tests para backward compatibility
+- `test_normalization_config.py`: 10 tests for configuration
+- `test_normalizers.py`: 23 tests for specialized normalizers
+- `test_normalize_mixin_refactored.py`: 20 tests for backward compatibility
 
-**Total: 104 tests pasando ✅**
+**Total: 104 tests passing ✅**
 
-## 📚 Documentación
+## 📚 Documentation
 
-### Nuevos módulos exportados
+### New exported modules
 ```python
 from pandas_toolkit.io.base import (
-    NormalizationConfig,     # ← NUEVO
-    ColumnNormalizer,        # ← NUEVO
-    StringNormalizer,        # ← NUEVO
-    NullNormalizer,          # ← NUEVO
+    NormalizationConfig,     # ← NEW
+    ColumnNormalizer,        # ← NEW
+    StringNormalizer,        # ← NEW
+    NullNormalizer,          # ← NEW
 )
 ```
 
-### Uso directo de normalizers (avanzado)
+### Direct use of normalizers (advanced)
 ```python
 from pandas_toolkit.io.base.normalizers import ColumnNormalizer, NullNormalizer
 
-# Normalizar solo columnas
+# Normalize columns only
 df = ColumnNormalizer.normalize(df, convert_case="upper")
 
-# Normalizar solo nulls
+# Normalize nulls only
 df = NullNormalizer.normalize(df, null_values=['MISSING'])
 
-# Obtener resumen de nulls
+# Get null summary
 summary = NullNormalizer.get_null_summary(df)
 print(summary)
 #   column  null_count  null_percentage
 # 0      A           2        33.333333
 ```
 
-## 🔮 Próximos Pasos (Fases Futuras)
+## 🔮 Next Steps (Future Phases)
 
-### Fase 2: Normalizaciones Core (En desarrollo)
-- Normalización de fechas
-- Normalización numérica
-- Mejoras en manejo de nulls
+### Phase 2: Core Normalizations (In development)
+- Date normalization
+- Numeric normalization
+- Improvements in null handling
 
-### Fase 3: Normalizaciones Avanzadas
-- Normalización de booleanos
-- Detección automática de tipos
-- Estandarización de categorías
+### Phase 3: Advanced Normalizations
+- Boolean normalization
+- Automatic type detection
+- Category standardization
 
-### Fase 4: Sistema de Reportes
-- Reportes detallados de cambios
-- Logging de transformaciones
-- Estadísticas de normalización
+### Phase 4: Report System
+- Detailed change reports
+- Transformation logging
+- Normalization statistics
 
 ## ❓ FAQ
 
-**P: ¿Debo cambiar mi código existente?**  
-R: No, todo el código existente sigue funcionando. Los cambios son retrocompatibles.
+**Q: Do I need to change my existing code?**  
+A: No, all existing code continues working. Changes are backward compatible.
 
-**P: ¿Cuándo debo usar `drop_original=True`?**  
-R: Úsalo cuando estés seguro de que no necesitas los valores originales y quieres ahorrar memoria.
+**Q: When should I use `drop_original=True`?**  
+A: Use it when you're sure you don't need the original values and want to save memory.
 
-**P: ¿Qué preset debo usar?**  
-R: 
-- `minimal`: Para limpieza ligera
-- `basic`: Para la mayoría de casos (recomendado por defecto)
-- `full`: Para limpieza exhaustiva
-- `analysis_ready`: Para preparar datos para análisis (reemplaza columnas)
+**Q: Which preset should I use?**  
+A: 
+- `minimal`: For light cleaning
+- `basic`: For most cases (recommended by default)
+- `full`: For exhaustive cleaning
+- `analysis_ready`: To prepare data for analysis (replaces columns)
 
-**P: ¿Puedo crear mis propios presets?**  
-R: Sí, puedes extender `_PRESETS` en `config.py` o usar configuración personalizada.
+**Q: Can I create my own presets?**  
+A: Yes, you can extend `_PRESETS` in `config.py` or use custom configuration.
 
-**P: ¿Los métodos `_remove_accents` y `_handle_duplicate_columns` siguen disponibles?**  
-R: Sí, están marcados como deprecated pero siguen funcionando para compatibilidad.
+**Q: Are the `_remove_accents` and `_handle_duplicate_columns` methods still available?**  
+A: Yes, they are marked as deprecated but still work for compatibility.
 
-## 🐛 Reporte de Issues
+## 🐛 Issue Reporting
 
-Si encuentras algún problema con el refactoring, por favor reporta:
-- Descripción del problema
-- Código que falló
-- Comportamiento esperado vs actual
-- Versión anterior que funcionaba (si aplica)
+If you encounter any issues with the refactoring, please report:
+- Problem description
+- Code that failed
+- Expected vs actual behavior
+- Previous version that worked (if applicable)
 
 ## 📝 Changelog
 
-### v2.0.0 - Fase 1 Refactoring (2026-02-25)
+### v2.0.0 - Phase 1 Refactoring (2026-02-25)
 
 **Added:**
-- Sistema de configuración con `NormalizationConfig`
+- Configuration system with `NormalizationConfig`
 - Presets: `minimal`, `basic`, `full`, `analysis_ready`
-- Parámetro `drop_original` para reemplazar columnas
-- Parámetro `standardize_nulls` mejorado
-- Parámetro `suffix` personalizable
-- Soporte para `config` dict/object
-- Normalizadores especializados: `ColumnNormalizer`, `StringNormalizer`, `NullNormalizer`
-- 53 nuevos tests
+- `drop_original` parameter to replace columns
+- Improved `standardize_nulls` parameter
+- Customizable `suffix` parameter
+- Support for `config` dict/object
+- Specialized normalizers: `ColumnNormalizer`, `StringNormalizer`, `NullNormalizer`
+- 53 new tests
 
 **Changed:**
-- Refactorizado `NormalizeMixin` para usar normalizers especializados
-- Mejorada modularidad del código
+- Refactored `NormalizeMixin` to use specialized normalizers
+- Improved code modularity
 
 **Maintained:**
-- 100% compatibilidad hacia atrás
-- Todos los métodos existentes siguen funcionando
-- Sin breaking changes
+- 100% backward compatibility
+- All existing methods continue working
+- No breaking changes
 
 ---
 
-**¡Gracias por usar la EDA Toolkit!** 🚀
+**Thank you for using the EDA Toolkit!** 🚀

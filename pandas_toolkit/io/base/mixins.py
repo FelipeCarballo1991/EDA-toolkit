@@ -1,8 +1,14 @@
 import pandas as pd
 from pathlib import Path
-from collections import defaultdict
-import re
-import unicodedata
+from typing import Optional, Union, Dict, Any
+import warnings
+
+from .normalizers import (
+    NormalizationConfig,
+    ColumnNormalizer,
+    StringNormalizer,
+    NullNormalizer
+)
 
 
 class NormalizeMixin:
@@ -11,15 +17,22 @@ class NormalizeMixin:
     
     Provides methods for:
     - Normalizing column names (remove accents, standardize casing)
-    - Normalizing cell values (trim whitespace, convert case)
+    - Normalizing cell values (trim whitespace, convert case, handle nulls)
     - Handling empty rows and columns
+    - Configuration-based normalization with presets
+    
+    Uses specialized normalizers:
+    - ColumnNormalizer: For column name normalization
+    - StringNormalizer: For string value normalization
+    - NullNormalizer: For null value standardization
     """
     
     def normalize_columns(
         self,
         df: pd.DataFrame,
         convert_case: str = "lower",
-        empty_col_name: str = "unnamed"
+        empty_col_name: str = "unnamed",
+        remove_special_chars: bool = True
     ) -> pd.DataFrame:
         """
         Normalize DataFrame column names.
@@ -40,6 +53,8 @@ class NormalizeMixin:
             Case conversion for column names.
         empty_col_name : str, default 'unnamed'
             Name for empty/missing column names.
+        remove_special_chars : bool, default True
+            Whether to remove special characters from column names.
         
         Returns
         -------
@@ -53,43 +68,12 @@ class NormalizeMixin:
         >>> print(normalized.columns.tolist())
         ['first_name', 'last_name', 'employee_id']
         """
-        # Create a copy to avoid modifying original
-        df = df.copy()
-        
-        # Step 1: Clean each column name
-        cleaned_cols = []
-        for col in df.columns:
-            if pd.isna(col) or col == "":
-                cleaned = empty_col_name
-            else:
-                # Convert to string
-                col_str = str(col).strip()
-                
-                # Remove accents
-                col_str = self._remove_accents(col_str)
-                
-                # Convert case
-                if convert_case == "lower":
-                    col_str = col_str.lower()
-                elif convert_case == "upper":
-                    col_str = col_str.upper()
-                
-                # Replace special chars and spaces with underscore
-                col_str = re.sub(r'[^\w]+', '_', col_str)
-                
-                # Remove leading/trailing underscores
-                col_str = col_str.strip('_')
-                
-                # Replace empty with default name
-                cleaned = col_str if col_str else empty_col_name
-            
-            cleaned_cols.append(cleaned)
-        
-        # Step 2: Handle duplicates
-        final_cols = self._handle_duplicate_columns(cleaned_cols, empty_col_name)
-        
-        df.columns = final_cols
-        return df
+        return ColumnNormalizer.normalize(
+            df,
+            convert_case=convert_case,
+            empty_col_name=empty_col_name,
+            remove_special_chars=remove_special_chars
+        )
 
     def normalize(
         self,
@@ -97,19 +81,26 @@ class NormalizeMixin:
         drop_empty_cols: bool = False,
         drop_empty_rows: bool = False,
         trim_strings: bool = True,
-        convert_case: str = "lower"
+        convert_case: str = "lower",
+        standardize_nulls: bool = True,
+        null_values: Optional[list] = None,
+        drop_original: bool = False,
+        suffix: str = "_norm",
+        config: Optional[Union[NormalizationConfig, Dict[str, Any]]] = None,
+        preset: Optional[str] = None
     ) -> pd.DataFrame:
         """
         Normalize DataFrame cell values.
         
-        Creates new columns with "_norm" suffix containing normalized values.
-        Original columns are preserved.
+        Can create new columns with suffix (default behavior) or replace
+        original columns (if drop_original=True).
         
         Transformations applied:
-        1. Trim leading/trailing whitespace (if trim_strings=True)
-        2. Convert to specified case (if convert_case is set)
-        3. Convert empty strings to None
-        4. Drop empty rows/columns (if configured)
+        1. Standardize null values (if standardize_nulls=True)
+        2. Trim leading/trailing whitespace (if trim_strings=True)
+        3. Convert to specified case (if convert_case is set)
+        4. Convert empty strings to None
+        5. Drop empty rows/columns (if configured)
         
         Parameters
         ----------
@@ -123,14 +114,28 @@ class NormalizeMixin:
             Strip whitespace from string values.
         convert_case : {'lower', 'upper', None}, default 'lower'
             Case conversion for string values.
+        standardize_nulls : bool, default True
+            Standardize various null representations to np.nan.
+        null_values : list of str, optional
+            Additional values to treat as null (beyond defaults).
+        drop_original : bool, default False
+            If True, replaces original columns. If False, creates new columns with suffix.
+        suffix : str, default '_norm'
+            Suffix for normalized columns (only used if drop_original=False).
+        config : NormalizationConfig or dict, optional
+            Configuration object or dict. Overrides individual parameters.
+        preset : str, optional
+            Preset configuration name ('minimal', 'basic', 'full', 'analysis_ready').
+            Shortcut for config=NormalizationConfig.from_preset(preset).
         
         Returns
         -------
         pd.DataFrame
-            DataFrame with original columns plus new "_norm" columns.
+            DataFrame with normalized values (either replaced or as new columns).
         
         Examples
         --------
+        >>> # Basic usage (backward compatible)
         >>> df = pd.DataFrame({
         ...     "Name": ["  JUAN  ", "  MARIA  "],
         ...     "Status": ["  ACTIVE  ", "  "]
@@ -138,104 +143,98 @@ class NormalizeMixin:
         >>> normalized = reader.normalize(df, trim_strings=True, convert_case="lower")
         >>> print(normalized.columns.tolist())
         ['Name', 'Status', 'Name_norm', 'Status_norm']
-        >>> print(normalized['Name_norm'].tolist())
-        ['juan', 'maria']
+        
+        >>> # Replace original columns
+        >>> normalized = reader.normalize(df, drop_original=True)
+        >>> print(normalized.columns.tolist())
+        ['Name', 'Status']
+        
+        >>> # Using preset
+        >>> normalized = reader.normalize(df, preset='basic')
+        
+        >>> # Using config
+        >>> config = NormalizationConfig.from_preset('full')
+        >>> normalized = reader.normalize(df, config=config)
         """
         df = df.copy()
         
-        # Drop empty rows
+        # Handle configuration
+        if preset is not None:
+            config = NormalizationConfig.from_preset(preset)
+        elif isinstance(config, dict):
+            config = NormalizationConfig.from_dict(config)
+        elif config is None:
+            # Build config from individual parameters
+            config = NormalizationConfig(
+                strings={'trim': trim_strings, 'case': convert_case, 'remove_special': False},
+                nulls={'standardize': standardize_nulls, 'values': null_values or []},
+                columns={'drop_original': drop_original, 'suffix': suffix, 'drop_empty': drop_empty_cols}
+            )
+        
+        # Apply configuration parameters
+        drop_empty_rows = drop_empty_rows or config.columns.get('drop_empty', False)
+        drop_empty_cols = config.columns.get('drop_empty', drop_empty_cols)
+        drop_original = config.columns.get('drop_original', drop_original)
+        suffix = config.columns.get('suffix', suffix)
+        
+        # Step 1: Standardize null values
+        if config.nulls.get('standardize', True):
+            custom_nulls = config.nulls.get('values', [])
+            df = NullNormalizer.normalize(df, null_values=custom_nulls, include_defaults=True)
+        
+        # Step 2: Drop empty rows
         if drop_empty_rows:
             df = df.dropna(how='all')
         
-        # Drop empty columns
+        # Step 3: Drop empty columns
         if drop_empty_cols:
             df = df.dropna(axis=1, how='all')
         
-        # Create normalized columns
+        # Step 4: Normalize string values in each column
+        trim = config.strings.get('trim', True)
+        case = config.strings.get('case', 'lower')
+        remove_special = config.strings.get('remove_special', False)
+        
         for col in df.columns:
-            normalized_col = f"{col}_norm"
-            
-            # Get the column values
-            values = df[col].copy()
-            
-            # Convert to string for processing
-            values = values.astype(str)
-            
-            # Trim strings
-            if trim_strings:
-                values = values.str.strip()
-            
-            # Convert empty strings and 'nan' to None
-            values = values.replace('nan', None)
-            values = values.replace('', None)
-            
-            # Convert case
-            if convert_case == "lower":
-                values = values.str.lower()
-            elif convert_case == "upper":
-                values = values.str.upper()
-            
-            # Add normalized column
-            df[normalized_col] = values
+            # Only process object/string columns
+            if StringNormalizer.is_string_column(df[col]):
+                # Normalize the column
+                normalized_values = StringNormalizer.normalize(
+                    df[col],
+                    trim=trim,
+                    convert_case=case,
+                    remove_special_chars=remove_special
+                )
+                
+                if drop_original:
+                    # Replace original column
+                    df[col] = normalized_values
+                else:
+                    # Create new column with suffix
+                    normalized_col = f"{col}{suffix}"
+                    df[normalized_col] = normalized_values
         
         return df
-
+    
+    # Legacy support: delegate to specialized normalizers
     @staticmethod
     def _remove_accents(text: str) -> str:
         """
         Remove accents and diacritical marks from text.
         
-        Parameters
-        ----------
-        text : str
-            Text with potential accents.
-        
-        Returns
-        -------
-        str
-            Text without accents.
-        
-        Examples
-        --------
-        >>> NormalizeMixin._remove_accents("Café")
-        'Cafe'
-        >>> NormalizeMixin._remove_accents("Português")
-        'Portugues'
+        .. deprecated::
+            Use ColumnNormalizer._remove_accents() instead.
+            This method is kept for backward compatibility.
         """
-        nfd = unicodedata.normalize('NFD', text)
-        return ''.join(c for c in nfd if unicodedata.category(c) != 'Mn')
-
+        return ColumnNormalizer._remove_accents(text)
+    
     @staticmethod
     def _handle_duplicate_columns(cols: list, empty_name: str = "unnamed") -> list:
         """
         Handle duplicate column names by appending numeric suffixes.
         
-        Parameters
-        ----------
-        cols : list
-            List of column names.
-        empty_name : str
-            Name to use for empty columns.
-        
-        Returns
-        -------
-        list
-            List with unique column names (duplicates get numeric suffixes).
-        
-        Examples
-        --------
-        >>> cols = ["name", "name", "age", "age"]
-        >>> NormalizeMixin._handle_duplicate_columns(cols)
-        ['name', 'name_1', 'age', 'age_1']
+        .. deprecated::
+            Use ColumnNormalizer._handle_duplicate_columns() instead.
+            This method is kept for backward compatibility.
         """
-        counter = defaultdict(int)
-        result = []
-        
-        for col in cols:
-            if counter[col] == 0:
-                result.append(col)
-            else:
-                result.append(f"{col}_{counter[col]}")
-            counter[col] += 1
-        
-        return result
+        return ColumnNormalizer._handle_duplicate_columns(cols, empty_name)

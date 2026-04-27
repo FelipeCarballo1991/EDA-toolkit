@@ -1,0 +1,178 @@
+{
+  "timestamp": "2026-02-26T16:56:41.916298",
+  "preset_used": "full",
+  "config_used": {
+    "preset": "full",
+    "strings": {
+      "trim": true,
+      "case": "lower",
+      "remove_special": true
+    },
+    "nulls": {
+      "standardize": true,
+      "values": [
+        "",
+        "N/A",
+        "n/a",
+        "NA",
+        "null",
+        "NULL",
+        "None",
+        "NONE",
+        "nan",
+        "NaN",
+        "NAN",
+        "-",
+        "--",
+        "---",
+        "nil",
+        "NIL"
+      ]
+    },
+    "dates": {
+      "normalize": true,
+      "format": "%Y-%m-%d",
+      "infer": true
+    },
+    "numbers": {
+      "normalize": true,
+      "remove_currency": true,
+      "decimal_separator": ".",
+      "thousand_separator": ",",
+      "handle_percentages": true
+    },
+    "booleans": {
+      "normalize": true,
+      "true_values": [
+        "yes",
+        "y",
+        "si",
+        "sí",
+        "1",
+        "true",
+        "t",
+        "verdadero"
+      ],
+      "false_values": [
+        "no",
+        "n",
+        "0",
+        "false",
+        "f",
+        "falso"
+      ]
+    },
+    "types": {
+      "auto_detect": true
+    },
+    "categories": {
+      "standardize": true,
+      "fuzzy_threshold": 0.85,
+      "mappings": {}
+    },
+    "columns": {
+      "drop_original": false,
+      "suffix": "_norm",
+      "drop_empty": true
+    }
+  },
+  "rows_processed": 3,
+  "columns_processed": 4,
+  "time_elapsed": 0.016228199005126953,
+  "transformations": [
+    {
+      "name": "date_normalization",
+      "description": "Normalized dates to %Y-%m-%d",
+      "values_changed": 3,
+      "details": {
+        "columns_processed": 1,
+        "formats_detected": {
+          "%d/%m/%Y": 3
+        },
+        "output_format": "%Y-%m-%d"
+      },
+      "warnings": []
+    },
+    {
+      "name": "numeric_normalization",
+      "description": "Normalized numeric values",
+      "values_changed": 12,
+      "details": {
+        "columns_processed": 4,
+        "currency_symbols_removed": 3,
+        "percentages_converted": 3
+      },
+      "warnings": []
+    },
+    {
+      "name": "string_normalization",
+      "description": "Normalized string values (trim=True, case=lower)",
+      "values_changed": 3,
+      "details": {
+        "trim": true,
+        "case": "lower",
+        "remove_special": true,
+        "columns_processed": 1
+      },
+      "warnings": []
+    }
+  ],
+  "stats": {
+    "date_normalization": 3,
+    "numeric_normalization": 12,
+    "string_normalization": 3
+  },
+  "warnings": [],
+  "column_changes": {
+    "date": {
+      "original_name": "date",
+      "changes": {
+        "type": "numeric",
+        "formats_detected": {
+          "%d/%m/%Y": 3
+        },
+        "output_format": "%Y-%m-%d",
+        "successful_parses": 3,
+        "failed_parses": 0,
+        "currency_removed": 0,
+        "separators_removed": 0,
+        "percentages_converted": 0,
+        "successful_conversions": 3,
+        "failed_conversions": 0
+      }
+    },
+    "price": {
+      "original_name": "price",
+      "changes": {
+        "type": "numeric",
+        "currency_removed": 3,
+        "separators_removed": 1,
+        "percentages_converted": 0,
+        "successful_conversions": 3,
+        "failed_conversions": 0
+      }
+    },
+    "discount": {
+      "original_name": "discount",
+      "changes": {
+        "type": "numeric",
+        "currency_removed": 0,
+        "separators_removed": 0,
+        "percentages_converted": 3,
+        "successful_conversions": 3,
+        "failed_conversions": 0
+      }
+    },
+    "date_norm": {
+      "original_name": "date_norm",
+      "changes": {
+        "type": "numeric",
+        "currency_removed": 0,
+        "separators_removed": 0,
+        "percentages_converted": 0,
+        "successful_conversions": 3,
+        "failed_conversions": 0
+      }
+    }
+  }
+}

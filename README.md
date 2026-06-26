@@ -746,4 +746,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Contact
 
-For questions or issues, please open an issue on GitHub
+For questions or issues, please open an issue on GitHub or send me an email to felipecarballo1991@gmail.com
